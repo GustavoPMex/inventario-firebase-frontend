@@ -87,8 +87,9 @@ export default {
         const store = useStore()
 
         const autorizacion = computed(() =>{
-            return Object.entries(store.getters.getAuth).length
+            return store.getters.getAuth
         })
+
         return {
             autorizacion
         }

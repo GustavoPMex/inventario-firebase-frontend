@@ -115,7 +115,7 @@ const routes = [
         name: 'Signup',
         component: () => import('../views/registro/Signup.vue')
       }
-    ]
+    ],
   },
   {
     path: '/perfil',
@@ -144,7 +144,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth){
-    if (Object.entries(store.getters.getAuth).length){
+    if (store.getters.getAuth){
       next()
     } else {
       next('/registro')

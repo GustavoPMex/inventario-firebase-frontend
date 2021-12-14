@@ -1,3 +1,5 @@
+import axios from 'axios'
+import swal from 'sweetalert'
 import { createStore } from 'vuex'
 import router from '../router'
 
@@ -88,12 +90,12 @@ export default createStore({
       usuario: '',
       email: '',
       direccion: '',
-      telefono: 0,
+      telefono: '',
       contrasenaUno: '',
       contrasenaDos: '',
     },
     // Autorización del usuario(Token)
-    userAuth: {},
+    userAuth: false,
     perfilActualTemporal: {
       id: 0,
       usuario: '',
@@ -304,11 +306,8 @@ export default createStore({
       state.personalFiltrados = payload
     },
     // <<< ------------------------------ Registro ------------------------------ >>>
-    INGRESO_USUARIO(state, payload){
+    ESTABLECER_USER_AUTH(state, payload){
       state.userAuth = payload
-    },
-    CERRAR_SESION(state){
-      state.userAuth = {}
     },
     NUEVO_USUARIO(state, payload){
       state.personal.push(payload)
@@ -350,11 +349,11 @@ export default createStore({
     // <<< ------------------------------ Articulos ------------------------------ >>>
     // Carga todos los articulos que tengamos almacenados actualmente
     establecerArticulos({commit}){
-      if (localStorage.getItem('articulos')){
-        const articulos = JSON.parse(localStorage.getItem('articulos'))
+      if (sessionStorage.getItem('articulos')){
+        const articulos = JSON.parse(sessionStorage.getItem('articulos'))
         commit('ESTABLECER_ARTICULOS', articulos)
       } else {
-        localStorage.setItem('articulos', JSON.stringify([]))
+        sessionStorage.setItem('articulos', JSON.stringify([]))
       }
     },
     // Configuramos el articulo para poder visualizarlo en el formulario
@@ -365,12 +364,12 @@ export default createStore({
     nuevoArticulo({commit, state}, articulo){
       articulo.id = Math.floor((Math.random() * 1000) + 1)
       commit('NUEVO_ARTICULO', articulo)
-      localStorage.setItem('articulos', JSON.stringify(state.articulos))
+      sessionStorage.setItem('articulos', JSON.stringify(state.articulos))
     },
     // Editamos un articulo
     actualizarArticulo({commit, state}, articulo){
       commit('ACTUALIZAR_ARTICULO', articulo)
-      localStorage.setItem('articulos', JSON.stringify(state.articulos))
+      sessionStorage.setItem('articulos', JSON.stringify(state.articulos))
     },
     // Eliminamos lo que se encuentre en state.articulo
     eliminarArticuloAlmacenado({commit}){
@@ -378,7 +377,7 @@ export default createStore({
     },
     eliminarArticulo({commit, state}, id){
       commit('ELIMINAR_ARTICULO', id)
-      localStorage.setItem('articulos', JSON.stringify(state.articulos))
+      sessionStorage.setItem('articulos', JSON.stringify(state.articulos))
     },
     establecerArticulosFiltrados({commit, state}, filtros){
       if (filtros.categorias.length | filtros.proveedores.length){
@@ -410,11 +409,11 @@ export default createStore({
     // <<< ------------------------------ Categorias ------------------------------ >>>
     // Carga los articulos almacenados en el local storage
     establecerCategorias({commit}){
-      if (localStorage.getItem('categorias')){
-        const categorias = JSON.parse(localStorage.getItem('categorias'))
+      if (sessionStorage.getItem('categorias')){
+        const categorias = JSON.parse(sessionStorage.getItem('categorias'))
         commit('ESTABLECER_CATEGORIAS', categorias)
       } else {
-        localStorage.setItem('categorias', JSON.stringify([]))
+        sessionStorage.setItem('categorias', JSON.stringify([]))
       }
     },
     // Agreamos una categoria y le añadimos un id aleatorio
@@ -422,7 +421,7 @@ export default createStore({
       const nuevaCat = JSON.parse(JSON.stringify(state.categoria))
       nuevaCat.id = Math.floor((Math.random() * 1000) + 1)
       commit('NUEVA_CATEGORIA', nuevaCat)
-      localStorage.setItem('categorias', JSON.stringify(state.categorias))
+      sessionStorage.setItem('categorias', JSON.stringify(state.categorias))
       state.categoria.id = 0
       state.categoria.nombre = ''
     },
@@ -433,17 +432,17 @@ export default createStore({
     // Categoria
     eliminarCategoria({commit, state}, id){
       commit('ELIMINAR_CATEGORIA', id)
-      localStorage.setItem('categorias', JSON.stringify(state.categorias))
+      sessionStorage.setItem('categorias', JSON.stringify(state.categorias))
     },
     // <<< ------------------------------ Redes sociales ------------------------------ >>>
     // Carga las redes sociales que tenamos almacenadas actualmente
     // En caso de que no tengamos, se crea el objeto vacío
     establecerRedes({commit}){
-      if(localStorage.getItem('redes')){
-        const redes = JSON.parse(localStorage.getItem('redes'))
+      if(sessionStorage.getItem('redes')){
+        const redes = JSON.parse(sessionStorage.getItem('redes'))
         commit('ESTABLECER_REDES', redes)
       } else {
-        localStorage.setItem('redes', JSON.stringify({
+        sessionStorage.setItem('redes', JSON.stringify({
           facebook: '',
           twitter: '', 
           instagram: ''
@@ -454,14 +453,14 @@ export default createStore({
     // Que son almacenadas temporalmente para que podamos utilizarlas 
     // en el formulario
     establecerRedesTemporales({commit}){
-      const redes = JSON.parse(localStorage.getItem('redes'))
+      const redes = JSON.parse(sessionStorage.getItem('redes'))
       commit('ESTABLECER_REDES_TEMPORALES', redes)
     },
     // Procesamos el formulario para establecer las nuevas redes sociales
     // y almacenarlas en el local storage
     nuevasRedesSociales({commit, state}, redes){
       commit('NUEVAS_REDES_SOCIALES', redes)
-      localStorage.setItem('redes', JSON.stringify(state.redesSociales))
+      sessionStorage.setItem('redes', JSON.stringify(state.redesSociales))
       // Limpiamos "las redes sociales actuales" que se usan para
       // visualizarlas en el formulario
       commit('ESTABLECER_REDES_TEMPORALES', {
@@ -472,11 +471,11 @@ export default createStore({
     },
     // <<< ------------------------------ Proveedores ------------------------------ >>>
     establecerProveedores({commit}){
-      if(localStorage.getItem('proveedores')){
-        const proveedores = JSON.parse(localStorage.getItem('proveedores'))
+      if(sessionStorage.getItem('proveedores')){
+        const proveedores = JSON.parse(sessionStorage.getItem('proveedores'))
         commit('ESTABLECER_PROVEEDORES', proveedores)
       } else {
-        localStorage.setItem('proveedores', JSON.stringify([]))
+        sessionStorage.setItem('proveedores', JSON.stringify([]))
       }
     },
     establecerProveedorTemporal({commit}, payload){
@@ -489,7 +488,7 @@ export default createStore({
       const nuevoProvee = JSON.parse(JSON.stringify(state.proveedor))
       nuevoProvee.id = Math.floor((Math.random() * 1000) + 1)
       commit('NUEVO_PROVEEDOR', nuevoProvee)
-      localStorage.setItem('proveedores', JSON.stringify(state.proveedores))
+      sessionStorage.setItem('proveedores', JSON.stringify(state.proveedores))
       
     },
     // Actualizamos el proveedor que solicitemos, pero a diferencias de los otros actions
@@ -497,7 +496,7 @@ export default createStore({
     actualizarProveedor({commit, state}){
       const proveedorActualizado = JSON.parse(JSON.stringify(state.proveedor))
       commit('ACTUALIZAR_PROVEEDOR', proveedorActualizado)
-      localStorage.setItem('proveedores', JSON.stringify(state.proveedores))
+      sessionStorage.setItem('proveedores', JSON.stringify(state.proveedores))
     },
     // Eliminamos el proveedor temporal almacenado
     eliminarProveedorTemporal({commit}){
@@ -506,7 +505,7 @@ export default createStore({
     // Eliminamos a un proveedor
     eliminarProveedor({commit, state}, id){
       commit('ELIMINAR_PROVEEDOR', id)
-      localStorage.setItem('proveedores', JSON.stringify(state.proveedores))
+      sessionStorage.setItem('proveedores', JSON.stringify(state.proveedores))
     },
     // Realizamos una busqueda con lo que el usuario nos provee
     busquedaProveedor({commit, state}, busqueda){
@@ -521,11 +520,11 @@ export default createStore({
     },
     // <<< ------------------------------ Taller ------------------------------ >>>
     establecerTallerServicios({commit}){
-      if(localStorage.getItem('tallerServicios')){
-        const pendientes = JSON.parse(localStorage.getItem('tallerServicios'))
+      if(sessionStorage.getItem('tallerServicios')){
+        const pendientes = JSON.parse(sessionStorage.getItem('tallerServicios'))
         commit('ESTABLECER_TALLER_PENDIENTES', pendientes)
       } else {
-        localStorage.setItem('tallerServicios', JSON.stringify([]))
+        sessionStorage.setItem('tallerServicios', JSON.stringify([]))
       }
     },
     establecerServicioTemporal({commit}, servicio){
@@ -535,19 +534,19 @@ export default createStore({
       const nuevoServicio = JSON.parse(JSON.stringify(state.servicioTaller))
       nuevoServicio.id =  Math.floor((Math.random() * 1000) + 1)
       commit('NUEVO_SERVICIO_TALLER', nuevoServicio)
-      localStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
+      sessionStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
     },
     actualizarServicioTaller({commit, state}){
       const servicioActual = JSON.parse(JSON.stringify(state.servicioTaller))
       commit('ACTUALIZAR_SERVICIO_TALLER', servicioActual)
-      localStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
+      sessionStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
     },
     eliminarServicioTemporal({commit}){
       commit('ELIMINAR_SERVICIO_TEMPORAL')
     },
     eliminarServicio({commit, state}, id){
       commit('ELIMINAR_SERVICIO_TALLER', id)
-      localStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
+      sessionStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
     },
     busquedaServicioTaller({commit, state}, filtros){
       if (filtros.tecnicos.length | filtros.tipos.length){
@@ -576,11 +575,11 @@ export default createStore({
     },
     // <<< ------------------------------ Clientes ------------------------------ >>>
     establecerClientes({commit}){
-      if (localStorage.getItem('clientes')) {
-        const clientes = JSON.parse(localStorage.getItem('clientes'))
+      if (sessionStorage.getItem('clientes')) {
+        const clientes = JSON.parse(sessionStorage.getItem('clientes'))
         commit('ESTABLECER_CLIENTES', clientes)
       } else {
-        localStorage.setItem('clientes', JSON.stringify([]))
+        sessionStorage.setItem('clientes', JSON.stringify([]))
       }
     },
     busquedaCliente({commit, state}, busqueda){
@@ -600,27 +599,27 @@ export default createStore({
     nuevoCliente({commit, state}){
       state.cliente.id = Math.floor((Math.random() * 1000) + 1)
       commit('NUEVO_CLIENTE', state.cliente)
-      localStorage.setItem('clientes', JSON.stringify(state.clientes))
+      sessionStorage.setItem('clientes', JSON.stringify(state.clientes))
     },
     actualizarCliente({commit, state}){
       const clienteActual = JSON.parse(JSON.stringify(state.cliente))
       commit('ACTUALIZAR_CLIENTE', clienteActual)
-      localStorage.setItem('clientes', JSON.stringify(state.clientes))
+      sessionStorage.setItem('clientes', JSON.stringify(state.clientes))
     },
     eliminarClienteTemporal({commit}){
       commit('ELIMINAR_CLIENTE_TEMPORAL')
     },
     eliminarCliente({commit, state}, id){
       commit('ELIMINAR_CLIENTE', id)
-      localStorage.setItem('clientes', JSON.stringify(state.clientes))
+      sessionStorage.setItem('clientes', JSON.stringify(state.clientes))
     },
     // <<< ------------------------------ Personal ------------------------------ >>>
     establecerPersonal({commit}){
-      if(localStorage.getItem('personal')) {
-        const personal = JSON.parse(localStorage.getItem('personal'))
+      if(sessionStorage.getItem('personal')) {
+        const personal = JSON.parse(sessionStorage.getItem('personal'))
         commit('ESTABLECER_PERSONAL', personal)
       } else {
-        localStorage.setItem('personal', JSON.stringify([]))
+        sessionStorage.setItem('personal', JSON.stringify([]))
       }
     },
     eliminarUsuarioTemporal({commit}){
@@ -639,44 +638,103 @@ export default createStore({
     },
     // <<< ------------------------------ Registro ------------------------------ >>>
     establecerInicio({commit}){
-      if(localStorage.getItem('sesionUsuario')){
-        const usuarioActual = JSON.parse(localStorage.getItem('sesionUsuario'))
-        commit('INGRESO_USUARIO', usuarioActual)
+      if(sessionStorage.getItem('sesionUsuario')){
+        const usuarioActual = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+        commit('ESTABLECER_USER_AUTH', usuarioActual)
       } else {
-        localStorage.setItem('sesionUsuario', JSON.stringify({}))
+        sessionStorage.setItem('sesionUsuario', JSON.stringify({}))
       }
     },
-    ingresoUsuario({commit,state}, usuario){
-      const usuarioActual = JSON.parse(JSON.stringify(usuario))
-      commit('INGRESO_USUARIO', {
-        id: usuarioActual.id,
-        usuario: usuarioActual.usuario,
-        foto: usuarioActual.foto,
-        email: usuarioActual.email,
-        direccion: usuarioActual.direccion,
-        telefono: usuarioActual.telefono
+    async ingresoUsuario({commit, state}, usuario){
+      const firebaseResponse = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
+      await axios.post(firebaseResponse, {
+        email: usuario.correo,
+        password: usuario.contrasena,
+        returnSecureToken: true
       })
-      localStorage.setItem('sesionUsuario', JSON.stringify(state.userAuth))
-      router.push('/')
+      .then((response) => {
+        const dataFirebase = response.data
+        sessionStorage.setItem('sesionUsuario', JSON.stringify(dataFirebase))
+        commit('ESTABLECER_USER_AUTH', dataFirebase)
+        router.push({name: 'Home'})
+        swal({
+            text: `Bienvenido ${dataFirebase.email}`,
+        })
+      })
+      .catch((error) => {
+        swal({
+          icon: 'error',
+          title: 'Usuario o contraseña incorrecta',
+          text: 'Intenta otra vez'
+        })
+      })
 
     },
     cerrarSession({commit}){
-      commit('CERRAR_SESION')
-      localStorage.setItem('sesionUsuario', JSON.stringify({}))
+      commit('ESTABLECER_USER_AUTH', false)
+      sessionStorage.removeItem('sesionUsuario')
       router.push('/registro')
     },
-    nuevoUsuario({commit, state}){
-      state.registroUsuario.id = Math.floor((Math.random() * 1000) + 1)
-      commit('NUEVO_USUARIO', state.registroUsuario)
-      localStorage.setItem('personal', JSON.stringify(state.personal))
+    async nuevoUsuario({commit, state}){
+        const firestoreResponse = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
+
+        const nuevoRegistro = JSON.parse(JSON.stringify(state.registroUsuario))
+
+        await axios.post(firestoreResponse, {
+          email: nuevoRegistro.email,
+          password: nuevoRegistro.contrasenaUno,
+          returnSecureToken: true,
+        })
+        .then(async (response) => {
+          const dataFirebase = response.data
+          const firestoreBD = `https://inventario-20aa4-default-rtdb.firebaseio.com/usuarios/${dataFirebase.localId}.json`
+          await axios.post(firestoreBD, {
+            id: dataFirebase.localId,
+            foto: nuevoRegistro.foto,
+            usuario: nuevoRegistro.usuario,
+            email: dataFirebase.email,
+            direccion: nuevoRegistro.direccion,
+            telefono: nuevoRegistro.telefono,
+          })
+          .then(() => {
+            commit('ELIMINAR_USUARIO_TEMPORAL')
+            router.push({name: 'Login'})
+          })
+          .catch((error) => {
+
+            swal({
+              icon: 'error',
+              title: 'Error',
+              text: `Ha ocurrido un error: ${error.response.status}`
+            })
+          })
+
+        })
+        .catch((error) => {
+          var msjError;
+          const codeError = error.response.status
+
+          if (codeError === 400){
+            msjError = 'El correo ya está registrado'
+          } else {
+            msjError = 'Sin respuesta del servidor'
+          }
+
+          swal({
+            icon: 'error',
+            title: 'Ha ocurrido un error',
+            text: `${msjError}`
+          })
+        })
     },
+
     eliminarUsuario({commit, state}, id){
       commit('ELIMINAR_USUARIO', id)
-      localStorage.setItem('personal', JSON.stringify(state.personal))
+      sessionStorage.setItem('personal', JSON.stringify(state.personal))
     },
     // Editar perfil actual
     establecerPerfilActual({commit}){
-      const perfilActual = JSON.parse(localStorage.getItem('sesionUsuario'))
+      const perfilActual = JSON.parse(sessionStorage.getItem('sesionUsuario'))
       commit('ESTABLECER_PERFIL_ACTUAL', {
         id: perfilActual.id,
         usuario: perfilActual.usuario,
@@ -689,9 +747,9 @@ export default createStore({
     actualizarPerfil({commit, state}){
       const perfilActual = JSON.parse(JSON.stringify(state.perfilActualTemporal))
       commit('ACTUALIZAR_PERFIL', perfilActual)
-      commit('INGRESO_USUARIO', perfilActual)
-      localStorage.setItem('sesionUsuario', JSON.stringify(state.userAuth))
-      localStorage.setItem('personal', JSON.stringify(state.personal))
+      commit('ESTABLECER_USER_AUTH', perfilActual)
+      sessionStorage.setItem('sesionUsuario', JSON.stringify(state.userAuth))
+      sessionStorage.setItem('personal', JSON.stringify(state.personal))
     },
     eliminarPerfilActualTemporal({commit}){
       commit('ELIMINAR_PERFIL_ACTUAL_TEMPORAL')
@@ -710,7 +768,7 @@ export default createStore({
     },
     // Autorizacion
     getAuth(state){
-      return state.userAuth
+      return state.userAuth.registered
     },
     // <<< ------------------------------ Articulos ------------------------------ >>>
     getArticulos(state){
@@ -768,9 +826,6 @@ export default createStore({
     },
     getUsuario(state){
       return state.registroUsuario
-    },
-    getSesionActual(state){
-      return state.userAuth
     },
     getPerfilActual(state){
       return state.perfilActualTemporal

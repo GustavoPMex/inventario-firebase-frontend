@@ -3,12 +3,12 @@
         <h1 class="h1-registration mb-4">Ingreso</h1>
         <form @submit.prevent="sesion">
             <div class="form-group">
-                <label class="label-registration" for="">Usuario</label>
+                <label class="label-registration" for="">Correo electrónico</label>
                 <input 
                     class="form-control" 
-                    type="text"
-                    placeholder="Ingrese usuario"
-                    v-model="usuario"
+                    type="email"
+                    placeholder="Ingrese correo"
+                    v-model="email"
                 >
             </div>            
 
@@ -56,13 +56,12 @@
 <script>
 import { computed, ref } from '@vue/reactivity'
 import { useStore } from 'vuex'
-import swal from 'sweetalert'
 
 export default {
     setup(){
         const store = useStore()
 
-        const usuario = ref('')
+        const email = ref('')
         const contrasena = ref('')
 
         const usuarios = computed(() =>{
@@ -70,7 +69,7 @@ export default {
         })
 
         const btnDisabled = computed(() =>{
-            if (usuario.value && contrasena.value.length > 5) {
+            if (email.value && contrasena.value.length > 5) {
                 return false
             } else {
                 return true
@@ -78,23 +77,15 @@ export default {
         })
 
         const sesion = () =>{
-            const listaUsuarios =  usuarios.value
-            for(const indexUsuario in listaUsuarios){
-                const usuarioActual = listaUsuarios[indexUsuario]
-                if (usuarioActual.usuario === usuario.value &&
-                    usuarioActual.contrasenaUno === contrasena.value) {
-                    store.dispatch('ingresoUsuario', usuarioActual)
-                    return
-                }
+            const usuarioLogin = {
+                correo: email.value,
+                contrasena: contrasena.value
             }
-            swal({
-                text: 'Usuario o contraseña no válida',
-                icon: 'error'
-            })
-
+            store.dispatch('ingresoUsuario', usuarioLogin)
         }
+
         return {
-            usuario, contrasena,
+            email, contrasena,
             btnDisabled,
             sesion
         }

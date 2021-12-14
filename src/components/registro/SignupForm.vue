@@ -106,36 +106,25 @@ export default {
         })
 
         const btnDisabled = computed(() =>{
-            const usuario = camposUsuario.value
-            if (usuario.usuario && usuario.email &&
-                usuario.direccion && usuario.telefono.length > 9 &&
-                usuario.contrasenaUno > 5 &&
-                usuario.contrasenaDos === usuario.contrasenaUno) {
-                return false
-            } else {
-                return true
-            }
+            return false
+            // const usuario = camposUsuario.value
+            // if (usuario.usuario && usuario.email &&
+            //     usuario.direccion && usuario.telefono.length > 9 &&
+            //     usuario.contrasenaUno > 5 &&
+            //     usuario.contrasenaDos === usuario.contrasenaUno) {
+            //     return false
+            // } else {
+            //     return true
+            // }
         })
 
         const nuevoUsuario = () =>{
             store.dispatch('nuevoUsuario')
-            .then(() =>{
-                router.push({name: 'Login'})
-                swal({
-                    text: "Usuario registrado",
-                })
-                limpiarInputs()
-            })
-            
-        }
-
-        const limpiarInputs = () =>{
-            store.dispatch('eliminarUsuarioTemporal')
         }
 
         return {
             camposUsuario, btnDisabled,
-            nuevoUsuario, limpiarInputs
+            nuevoUsuario
         }
     }
 }
