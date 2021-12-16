@@ -10444,6 +10444,7 @@ a.active.router-link-exact-active.list-submenu{
 .swal-text{
   color: white;
   font-size: 22px !important;
+  text-align: center;
 }
 
 .swal-html-container{

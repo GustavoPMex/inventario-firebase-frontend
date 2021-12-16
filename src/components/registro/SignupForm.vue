@@ -8,12 +8,12 @@
             </div>
 
             <div class="form-group">
-                <label class="label-registration" for="">Usuario</label>
+                <label class="label-registration" for="">Nombre</label>
                 <input 
                     class="form-control" 
                     type="text"
-                    placeholder="Ingrese usuario"
-                    v-model="camposUsuario.usuario"
+                    placeholder="Ingrese Nombre"
+                    v-model="camposUsuario.nombre"
                 >
             </div>            
             
@@ -106,16 +106,15 @@ export default {
         })
 
         const btnDisabled = computed(() =>{
-            return false
-            // const usuario = camposUsuario.value
-            // if (usuario.usuario && usuario.email &&
-            //     usuario.direccion && usuario.telefono.length > 9 &&
-            //     usuario.contrasenaUno > 5 &&
-            //     usuario.contrasenaDos === usuario.contrasenaUno) {
-            //     return false
-            // } else {
-            //     return true
-            // }
+            const usuario = camposUsuario.value
+            if (usuario.nombre && usuario.email.includes('@') &&
+                usuario.direccion && usuario.telefono.length > 6 &&
+                usuario.contrasenaUno > 5 &&
+                usuario.contrasenaDos === usuario.contrasenaUno) {
+                return false
+            } else {
+                return true
+            }
         })
 
         const nuevoUsuario = () =>{

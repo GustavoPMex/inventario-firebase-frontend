@@ -87,7 +87,7 @@ export default createStore({
     registroUsuario: {
       id: 0,
       foto: '',
-      usuario: '',
+      nombre: '',
       email: '',
       direccion: '',
       telefono: '',
@@ -98,7 +98,7 @@ export default createStore({
     userAuth: false,
     perfilActualTemporal: {
       id: 0,
-      usuario: '',
+      nombre: '',
       foto: '',
       email: '',
       direccion: '',
@@ -294,7 +294,7 @@ export default createStore({
       state.registroUsuario = {
         id: 0,
         foto: '',
-        usuario: '',
+        nombre: '',
         email: '',
         direccion: '',
         telefono: '',
@@ -628,7 +628,7 @@ export default createStore({
     busquedaPersonal({commit, state}, busqueda){
       if(busqueda){
         const listaFiltrados = state.personal.filter(item => 
-          item.usuario.toLowerCase().startsWith(busqueda.toLowerCase())
+          item.nombre.toLowerCase().startsWith(busqueda.toLowerCase())
         )
         commit('BUSQUEDA_PERSONAL', listaFiltrados)
 
@@ -675,11 +675,12 @@ export default createStore({
       sessionStorage.removeItem('sesionUsuario')
       router.push('/registro')
     },
+    // REGISTRO DE USUARIO
     async nuevoUsuario({commit, state}){
         const firestoreResponse = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
 
         const nuevoRegistro = JSON.parse(JSON.stringify(state.registroUsuario))
-
+        
         await axios.post(firestoreResponse, {
           email: nuevoRegistro.email,
           password: nuevoRegistro.contrasenaUno,
@@ -691,7 +692,7 @@ export default createStore({
           await axios.post(firestoreBD, {
             id: dataFirebase.localId,
             foto: nuevoRegistro.foto,
-            usuario: nuevoRegistro.usuario,
+            nombre: nuevoRegistro.nombre,
             email: dataFirebase.email,
             direccion: nuevoRegistro.direccion,
             telefono: nuevoRegistro.telefono,
@@ -701,21 +702,33 @@ export default createStore({
             router.push({name: 'Login'})
           })
           .catch((error) => {
-
+            // <------ ELIMINAR USUARIO ----->
+            // Éste código es por qué necesitamos eliminar el usuario si ocurre un error al momento de realizar
+            // este post para registrar los datos extras del usuario
+            const userDatos = `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4`
+            axios.post(
+              userDatos, 
+              {'idToken': dataFirebase.idToken}
+            )
+            //Retornamos un mensaje de error
             swal({
               icon: 'error',
-              title: 'Error',
-              text: `Ha ocurrido un error: ${error.response.status}`
+              title: 'Ha ocurrido un error',
+              text: 'Accesso denegado'
             })
           })
 
         })
         .catch((error) => {
           var msjError;
-          const codeError = error.response.status
+          const msjFirebase = error.response.data.error.message
 
-          if (codeError === 400){
+          if (msjFirebase === "EMAIL_EXISTS"){
             msjError = 'El correo ya está registrado'
+          } else if (msjFirebase === "WEAK_PASSWORD : Password should be at least 6 characters"){
+            msjError = "La contraseña debe tener al menos 6 caracteres"
+          } else if (msjFirebase === 'INVALID_EMAI'){
+            msjError = 'Email inválido'
           } else {
             msjError = 'Sin respuesta del servidor'
           }
@@ -737,7 +750,7 @@ export default createStore({
       const perfilActual = JSON.parse(sessionStorage.getItem('sesionUsuario'))
       commit('ESTABLECER_PERFIL_ACTUAL', {
         id: perfilActual.id,
-        usuario: perfilActual.usuario,
+        nombre: perfilActual.nombre,
         foto: perfilActual.foto,
         email: perfilActual.email,
         direccion: perfilActual.direccion,
