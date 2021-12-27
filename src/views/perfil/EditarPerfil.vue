@@ -5,16 +5,6 @@
         <label class="label-registration" for="">Foto</label>
         <input type="file" name="avatar" class="form-control" id="id_avatar">
     </div>           
-    
-    <div class="form-group">
-        <label class="label-registration" for="">Correo</label>
-        <input 
-            class="form-control"
-            type="email"
-            placeholder="Ingrese correo"
-            v-model="camposUsuario.email"
-        >
-    </div>
 
     <div class="form-group">
         <label class="label-registration" for="">Dirección</label>
@@ -65,13 +55,12 @@ export default {
         const router = useRouter()
 
         const camposUsuario = computed(() =>{
-            return store.getters.getPerfilActual
+            return store.getters.getSesionActual
         })
 
         const btnDisabled = computed(() =>{
             const usuario = camposUsuario.value
-            if (usuario.email &&
-                usuario.direccion && usuario.telefono.length > 9) {
+            if (usuario.direccion && usuario.telefono.length > 9) {
                 return false
             } else {
                 return true

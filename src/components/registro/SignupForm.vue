@@ -2,10 +2,6 @@
     <div class="content-form mx-auto">
         <h1 class="h1-registration mb-4">Registro</h1>
         <form @submit.prevent="nuevoUsuario">
-            <div class="form-group">
-                <label class="label-registration" for="">Foto</label>
-                <input type="file" name="avatar" class="form-control" id="id_avatar">
-            </div>
 
             <div class="form-group">
                 <label class="label-registration" for="">Nombre</label>
@@ -54,7 +50,7 @@
                     class="form-control"
                     type="password"
                     placeholder="Ingrese contraseña"
-                    v-model="camposUsuario.contrasenaUno"
+                    v-model="camposUsuario.passwordUno"
                 >
             </div>
             
@@ -65,7 +61,7 @@
                     class="form-control"
                     type="password"
                     placeholder="Ingrese contraseña nuevamente"
-                    v-model="camposUsuario.contrasenaDos"
+                    v-model="camposUsuario.passwordDos"
                 >
             </div>
             
@@ -94,7 +90,6 @@
 <script>
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
-import swal from 'sweetalert'
 import { useRouter } from 'vue-router'
 export default {
     setup(){
@@ -109,8 +104,8 @@ export default {
             const usuario = camposUsuario.value
             if (usuario.nombre && usuario.email.includes('@') &&
                 usuario.direccion && usuario.telefono.length > 6 &&
-                usuario.contrasenaUno > 5 &&
-                usuario.contrasenaDos === usuario.contrasenaUno) {
+                usuario.passwordUno > 5 &&
+                usuario.passwordDos === usuario.passwordUno) {
                 return false
             } else {
                 return true

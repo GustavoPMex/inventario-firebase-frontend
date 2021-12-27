@@ -86,23 +86,17 @@ export default createStore({
     // <<< ------------------------------ Registro ------------------------------ >>>
     registroUsuario: {
       id: 0,
-      foto: '',
       nombre: '',
       email: '',
       direccion: '',
       telefono: '',
-      contrasenaUno: '',
-      contrasenaDos: '',
+      passwordUno: '',
+      passwordDos: '',
     },
     // Autorización del usuario(Token)
     userAuth: false,
+    sesionActual: {},
     perfilActualTemporal: {
-      id: 0,
-      nombre: '',
-      foto: '',
-      email: '',
-      direccion: '',
-      telefono: 0,
     }
   },
   mutations: {
@@ -293,13 +287,12 @@ export default createStore({
     ELIMINAR_USUARIO_TEMPORAL(state){
       state.registroUsuario = {
         id: 0,
-        foto: '',
         nombre: '',
         email: '',
         direccion: '',
         telefono: '',
-        contrasenaUno: '',
-        contrasenaDos: '',
+        passwordUno: '',
+        passwordDos: '',
       }
     },
     BUSQUEDA_PERSONAL(state, payload){
@@ -308,6 +301,9 @@ export default createStore({
     // <<< ------------------------------ Registro ------------------------------ >>>
     ESTABLECER_USER_AUTH(state, payload){
       state.userAuth = payload
+    },
+    ESTABLECER_SESION_ACTUAL(state, payload){
+      state.sesionActual = payload
     },
     NUEVO_USUARIO(state, payload){
       state.personal.push(payload)
@@ -636,32 +632,67 @@ export default createStore({
         commit('BUSQUEDA_PERSONAL', state.personal)
       }
     },
-    // <<< ------------------------------ Registro ------------------------------ >>>
-    establecerInicio({commit}){
-      if(sessionStorage.getItem('sesionUsuario')){
-        const usuarioActual = JSON.parse(sessionStorage.getItem('sesionUsuario'))
-        commit('ESTABLECER_USER_AUTH', usuarioActual)
+    // <<< ------------------------------ Registro y Autorizaciones ------------------------------ >>>
+    async establecerInicio({commit}){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        // Establecemos la autorización del usuario
+        commit('ESTABLECER_USER_AUTH', true)
+
+        const firebaseUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/usuarios/${datosSesion.id}.json?auth=${datosSesion.tokenSesion}`
+        await axios.get(
+          firebaseUrl
+        )
+        .then((responseFirebase) => {
+          const datosResponse =  Object.values(responseFirebase.data)[0]
+          datosResponse.tokenSesion = datosSesion.tokenSesion
+          datosResponse.idObjFirebase = Object.keys(responseFirebase.data)[0]
+          commit('ESTABLECER_SESION_ACTUAL', datosResponse)
+        })
+
       } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
         sessionStorage.setItem('sesionUsuario', JSON.stringify({}))
       }
     },
-    async ingresoUsuario({commit, state}, usuario){
-      const firebaseResponse = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
-      await axios.post(firebaseResponse, {
+    async ingresoUsuario({commit}, usuario){
+      const firebaseUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
+      await axios.post(firebaseUrl, {
         email: usuario.correo,
-        password: usuario.contrasena,
+        password: usuario.password,
         returnSecureToken: true
       })
-      .then((response) => {
-        const dataFirebase = response.data
-        sessionStorage.setItem('sesionUsuario', JSON.stringify(dataFirebase))
-        commit('ESTABLECER_USER_AUTH', dataFirebase)
-        router.push({name: 'Home'})
-        swal({
-            text: `Bienvenido ${dataFirebase.email}`,
+      .then(async (response) => {
+        const datosFirebase = response.data
+        const tokenAuth = datosFirebase.idToken
+        const usuarioUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/usuarios/${datosFirebase.localId}.json?auth=${tokenAuth}`
+
+        await axios.get(
+          usuarioUrl,
+        )
+        .then((usuarioResponse) =>{
+          const datosResponse = Object.values(usuarioResponse.data)[0]
+          datosResponse.tokenSesion = tokenAuth
+          datosResponse.idObjFirebase = Object.keys(usuarioResponse.data)[0]
+          commit('ESTABLECER_USER_AUTH', true)
+          commit('ESTABLECER_SESION_ACTUAL', datosResponse)
+          sessionStorage.setItem('sesionUsuario', JSON.stringify({
+              tokenSesion: datosResponse.tokenSesion,
+              id: datosResponse.id
+          }))
+          router.push({name: 'Home'})
+        })
+        .catch(() => {
+          swal({
+            icon: 'error',
+            title: 'OOPS..',
+            text: 'Algo ha salido mal'
+          })
         })
       })
-      .catch((error) => {
+      .catch(() => {
         swal({
           icon: 'error',
           title: 'Usuario o contraseña incorrecta',
@@ -672,33 +703,33 @@ export default createStore({
     },
     cerrarSession({commit}){
       commit('ESTABLECER_USER_AUTH', false)
+      commit('ESTABLECER_SESION_ACTUAL', {})
       sessionStorage.removeItem('sesionUsuario')
       router.push('/registro')
     },
     // REGISTRO DE USUARIO
     async nuevoUsuario({commit, state}){
-        const firestoreResponse = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
-
+        const firebaseUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
         const nuevoRegistro = JSON.parse(JSON.stringify(state.registroUsuario))
         
-        await axios.post(firestoreResponse, {
+        await axios.post(firebaseUrl, {
           email: nuevoRegistro.email,
-          password: nuevoRegistro.contrasenaUno,
+          password: nuevoRegistro.passwordUno,
           returnSecureToken: true,
         })
         .then(async (response) => {
-          const dataFirebase = response.data
-          const firestoreBD = `https://inventario-20aa4-default-rtdb.firebaseio.com/usuarios/${dataFirebase.localId}.json`
-          await axios.post(firestoreBD, {
-            id: dataFirebase.localId,
-            foto: nuevoRegistro.foto,
+          const datosFirebase = response.data
+          const firebaseUrlUsuario = `https://inventario-20aa4-default-rtdb.firebaseio.com/usuarios/${datosFirebase.localId}.json`
+
+          await axios.post(firebaseUrlUsuario, {
+            id: datosFirebase.localId,
             nombre: nuevoRegistro.nombre,
-            email: dataFirebase.email,
+            email: datosFirebase.email,
             direccion: nuevoRegistro.direccion,
             telefono: nuevoRegistro.telefono,
           })
           .then(() => {
-            commit('ELIMINAR_USUARIO_TEMPORAL')
+            commit('ELIMINAR_USUARIO_TEMPORAL') 
             router.push({name: 'Login'})
           })
           .catch((error) => {
@@ -708,7 +739,7 @@ export default createStore({
             const userDatos = `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4`
             axios.post(
               userDatos, 
-              {'idToken': dataFirebase.idToken}
+              {'idToken': datosFirebase.idToken}
             )
             //Retornamos un mensaje de error
             swal({
@@ -746,23 +777,36 @@ export default createStore({
       sessionStorage.setItem('personal', JSON.stringify(state.personal))
     },
     // Editar perfil actual
-    establecerPerfilActual({commit}){
-      const perfilActual = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+    establecerPerfilActual({commit, state}){
+      const perfilActual = JSON.parse(JSON.stringify(state.userAuth))
       commit('ESTABLECER_PERFIL_ACTUAL', {
         id: perfilActual.id,
         nombre: perfilActual.nombre,
-        foto: perfilActual.foto,
         email: perfilActual.email,
         direccion: perfilActual.direccion,
         telefono: perfilActual.telefono,
+        tokenSesion: perfilActual.tokenSesion,
+        idObjFirebase: perfilActual.idObjFirebase
       })
     },
-    actualizarPerfil({commit, state}){
-      const perfilActual = JSON.parse(JSON.stringify(state.perfilActualTemporal))
+    async actualizarPerfil({commit, state}){
+      const perfilActual = state.sesionActual
+
+      const datosUsuarioUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/usuarios/${perfilActual.id}/${perfilActual.idObjFirebase}.json?auth=${perfilActual.tokenSesion}`
+
+      await axios.put(
+        datosUsuarioUrl,
+        {
+          id: perfilActual.id,
+          nombre: perfilActual.nombre,
+          email: perfilActual.email,
+          direccion: perfilActual.direccion,
+          telefono: perfilActual.telefono,
+        }
+      )
+
       commit('ACTUALIZAR_PERFIL', perfilActual)
-      commit('ESTABLECER_USER_AUTH', perfilActual)
-      sessionStorage.setItem('sesionUsuario', JSON.stringify(state.userAuth))
-      sessionStorage.setItem('personal', JSON.stringify(state.personal))
+      commit('ESTABLECER_SESION_ACTUAL', perfilActual)
     },
     eliminarPerfilActualTemporal({commit}){
       commit('ELIMINAR_PERFIL_ACTUAL_TEMPORAL')
@@ -779,9 +823,12 @@ export default createStore({
     getRedesTemporales(state){
       return state.redesSocialesTemporal
     },
-    // Autorizacion
+    // <<< ------------------------------ Autorizacion --------------------------------- >>>
     getAuth(state){
-      return state.userAuth.registered
+      return  state.userAuth
+    },
+    getSesionActual(state){
+      return state.sesionActual
     },
     // <<< ------------------------------ Articulos ------------------------------ >>>
     getArticulos(state){

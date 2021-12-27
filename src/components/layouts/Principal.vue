@@ -18,11 +18,16 @@ export default {
             store.dispatch('setLayout', 'principal-layout')
         }
 
+        const cargarSesion = () =>{
+            store.dispatch('establecerInicio')
+        }
+
         return {
-            establecerLayout,
+            establecerLayout, cargarSesion
         }
     },
     beforeCreate(){
+        this.cargarSesion()
         document.body.classList.remove('registrobody');
     },
     created(){

@@ -6,7 +6,7 @@
 
     <div class="perfil-text">
         <p class="perfil-title">Usuario</p>
-        <p class="perfil-p">{{usuarioActual.usuario}}</p>
+        <p class="perfil-p">{{usuarioActual.nombre}}</p>
 
         <p class="perfil-title">Correo</p>
         <p class="perfil-p">{{usuarioActual.email}}</p>

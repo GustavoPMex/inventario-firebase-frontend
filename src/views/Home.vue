@@ -4,7 +4,7 @@
   <div class="resume-section-content">
         <h1 class="mb-5 h1-resume-section">
             Bienvenido
-            <span class="text-primary">User</span>
+            <span class="text-primary">{{usuarioActual}}</span>
         </h1>
         <div class="subheading w-100 mb-5">
             <p class="p-subheading">Mantente al día</p>
@@ -92,7 +92,12 @@ export default {
 
     // Comprobamos que el usuario esté autorizado
     const authorization = computed(() =>{
-      return Object.entries(store.getters.getAuth).length
+      return store.getters.getAuth
+    })
+
+    // Usuario logeado actualmente
+    const usuarioActual = computed(() =>{
+      return store.getters.getSesionActual.nombre
     })
 
     // Las redes sociales que tenemos actualmente almacenadas
@@ -153,7 +158,7 @@ export default {
     })
 
     return {
-      authorization, redes, 
+      authorization, usuarioActual, redes,
       totalEquipos, totalServicios, totalGarantias,
       redesActuales, establecerLayout}
 

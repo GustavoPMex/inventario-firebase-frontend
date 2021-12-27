@@ -18,7 +18,7 @@
                     class="form-control"
                     type="password"
                     placeholder="Ingrese contraseña"
-                    v-model="contrasena"
+                    v-model="password"
                 >
             </div>
 
@@ -62,14 +62,10 @@ export default {
         const store = useStore()
 
         const email = ref('')
-        const contrasena = ref('')
-
-        const usuarios = computed(() =>{
-            return store.getters.getPersonal
-        })
+        const password = ref('')
 
         const btnDisabled = computed(() =>{
-            if (email.value && contrasena.value.length > 5) {
+            if (email.value && password.value.length > 5) {
                 return false
             } else {
                 return true
@@ -79,13 +75,13 @@ export default {
         const sesion = () =>{
             const usuarioLogin = {
                 correo: email.value,
-                contrasena: contrasena.value
+                password: password.value
             }
             store.dispatch('ingresoUsuario', usuarioLogin)
         }
 
         return {
-            email, contrasena,
+            email, password,
             btnDisabled,
             sesion
         }
