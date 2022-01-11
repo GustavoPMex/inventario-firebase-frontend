@@ -91,7 +91,7 @@ export default {
         })
 
         const btnIsDisabled = computed(() => {
-            return !(categoria.value.nombre.length >= 3 && categoria.value.nombre.length < 20)
+            return !(categoria.value.nombre.length > 2 && categoria.value.nombre.length < 21)
         })
 
         const limpiarCategoria = () =>{
@@ -99,11 +99,7 @@ export default {
         }
 
         const nuevaCategoria = () =>{
-            if (categoria.value.nombre.length > 2 && categoria.value.nombre.length < 20){
-                store.dispatch('nuevaCategoria')
-            } else {
-                alert('El nombre de la categoria debe ser mayor a 2 y menor que 20')
-            }
+            store.dispatch('nuevaCategoria')
         }
 
         const eliminarCat = (categoria) => {

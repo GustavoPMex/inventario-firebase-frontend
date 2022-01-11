@@ -17,7 +17,6 @@
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
 import InputsProveedores from '../../components/proveedores/InputsProveedores.vue'
-import { useRouter } from 'vue-router'
 
 export default {
     components: {
@@ -25,7 +24,6 @@ export default {
     },
     setup(){
         const store = useStore()
-        const router = useRouter()
 
         const proveedor = computed(() =>{
             return store.getters.getProveedor
@@ -37,23 +35,15 @@ export default {
 
         const btnIsDisabled = computed(() =>{
             const proveedorNuevo = proveedor.value
-            if (proveedorNuevo.nombre && proveedorNuevo.direccion &&
-                proveedorNuevo.telefono.length > 9){
+            if (proveedorNuevo.nombre.length > 1 && proveedorNuevo.direccion.length > 4 &&
+                proveedorNuevo.telefono.length > 6){
                     return false
             }
             return true
         })
 
-        const limpiarProveedor = () =>{
-            store.dispatch('eliminarProveedorTemporal')
-        }
-
         const agregarNuevoProveedor = () =>{
             store.dispatch('nuevoProveedor')
-            .then(() => {
-                router.push({name: 'ProveedoresList'})
-                limpiarProveedor()
-            })
         }
 
         return {

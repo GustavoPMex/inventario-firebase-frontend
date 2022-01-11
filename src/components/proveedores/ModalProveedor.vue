@@ -55,8 +55,8 @@ export default {
 
         const btnIsDisabled = computed(() =>{
             const proveedorNuevo = proveedor.value
-            if (proveedorNuevo.nombre && proveedorNuevo.direccion &&
-                proveedorNuevo.telefono.length > 9){
+            if (proveedorNuevo.nombre.length > 1 && proveedorNuevo.direccion.length > 4 &&
+                proveedorNuevo.telefono.length > 6){
                     return false
             }
             return true

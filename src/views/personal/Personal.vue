@@ -32,7 +32,11 @@
             <th scope="col">Email</th>
             <th scope="col">Dirección</th>
             <th scope="col">Telefono</th>
-            <th scope="col">Acción</th>
+            <th
+                v-if="autorizacion"
+                scope="col"
+            >   Acción
+            </th>
         </tr>
         </thead>
         <tbody
@@ -41,7 +45,7 @@
         >
             <tr
             >
-                <td class="cuadro-tab-size" >{{persona.usuario}}</td>
+                <td class="cuadro-tab-size" >{{persona.nombre}}</td>
                 <td class="cuadro-tab-size">
                     <a
                         class="nameArticuloDetail"
@@ -53,7 +57,9 @@
                 </td>
                 <td class="cuadro-ta-tab-size">{{persona.direccion}}</td>
                 <td>{{persona.telefono}}</td>
-                <td>
+                <td
+                    v-if="autorizacion"
+                >
                     <a
                         role="button"
                         @click="eliminar(persona)"
@@ -77,7 +83,6 @@
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
 import swal from 'sweetalert'
-import { onMounted } from '@vue/runtime-core'
 
 export default {
     data(){
@@ -96,35 +101,39 @@ export default {
             return store.getters.getPersonalFiltrados
         })
 
-        const cargarPersonal = () =>{
-            store.dispatch('establecerPersonal')
-        }
+        const autorizacion = computed(() => {
+            return store.getters.getAutorizacionCorreo
+        })
 
         const eliminar = (persona) =>{
-            swal({
-                text: `¿Eliminar ${persona.usuario}?`,
-                icon: "warning",
-                buttons: true,
-                dangerMode: true
-            })
-            .then((willDelete) => {
-                if (willDelete){
-                    store.dispatch('eliminarUsuario', persona.id)
-                }
-            })
+            if (autorizacion.value){
+                swal({
+                    text: `¿Eliminar ${persona.nombre}?`,
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true
+                })
+                .then((willDelete) => {
+                    if (willDelete){
+                        store.dispatch('eliminarUsuario', persona.id)
+                    }
+                })
+            } else {
+                swal({
+                    icon: 'warning',
+                    title: 'ERROR',
+                    text: 'NO ESTÁ AUTORIZADO REALIZAR PARA ÉSTA ACCIÓN',
+                })
+            }
         }
 
         const busquedaPersona = (busqueda) =>{
             store.dispatch('busquedaPersonal', busqueda)
         }
 
-        onMounted(() =>{
-            cargarPersonal()
-            busquedaPersona()
-        })
 
         return {
-            personal, personalAlmacenado,
+            personal, personalAlmacenado, autorizacion,
             eliminar, busquedaPersona
         }
     },
@@ -135,7 +144,6 @@ export default {
             }
         }
     }
-
 }
 </script>
 

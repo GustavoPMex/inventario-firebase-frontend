@@ -6,6 +6,7 @@
 <script>
 import { useStore } from 'vuex';
 import Menu from '../Menu.vue'
+import { onMounted } from '@vue/runtime-core';
 
 export default {
     components: {
@@ -13,25 +14,29 @@ export default {
     },
     setup(){
         const store = useStore()
-        
-        const establecerLayout = () => {
-            store.dispatch('setLayout', 'principal-layout')
-        }
 
-        const cargarSesion = () =>{
-            store.dispatch('establecerInicio')
-        }
+        onMounted(async() => {
+            await store.dispatch('setLayout', 'principal-layout')
+            await store.dispatch('establecerInicio')
+            // Proveedores
+            await store.dispatch('establecerProveedores')
+            await store.dispatch('busquedaProveedor')
+            // Inventario
+            await store.dispatch('establecerCategorias')
+            // Personal
+            await store.dispatch('establecerPersonal')
+            await store.dispatch('busquedaPersonal')
+
+
+        })
 
         return {
-            establecerLayout, cargarSesion
+            
         }
     },
     beforeCreate(){
-        this.cargarSesion()
         document.body.classList.remove('registrobody');
-    },
-    created(){
-        this.establecerLayout()
     }
+
 }
 </script>

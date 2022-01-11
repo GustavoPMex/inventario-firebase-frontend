@@ -104,7 +104,6 @@
 import modalProveedor from '../../components/proveedores/ModalProveedor.vue'
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
-import { onMounted } from '@vue/runtime-core'
 
 export default {
     data() {
@@ -126,11 +125,6 @@ export default {
             return store.getters.getProveedoresFiltrados
         })
 
-
-        const cargarProveedores = () =>{
-            store.dispatch('establecerProveedores')
-        }
-
         const establecerProveedor = (proveedor) =>{
             const proveedorEstablecido = JSON.parse(JSON.stringify(proveedor))
             store.dispatch('establecerProveedorTemporal', proveedorEstablecido)
@@ -149,20 +143,14 @@ export default {
                 }
             })
         }
-        
 
         const buscarProveedor = (busqueda) =>{
             store.dispatch('busquedaProveedor', busqueda)
         }
 
-        onMounted(() => {
-            cargarProveedores()
-            buscarProveedor()
-        })
-
         return {
             proveedores,proveedoresAlmacenados,
-            establecerProveedor, eliminarProvee, buscarProveedor
+            establecerProveedor, eliminarProvee, buscarProveedor,
         }
     },
     watch: {
@@ -171,7 +159,7 @@ export default {
                 this.buscarProveedor()
             }
         }
-    }
+    },
 }
 </script>
 

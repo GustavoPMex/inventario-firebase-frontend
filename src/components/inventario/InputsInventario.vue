@@ -131,6 +131,12 @@ import ModalCategorias from './ModalCategorias.vue'
 import {useRoute} from 'vue-router'
 
 export default {
+    components: {
+        ModalCategorias
+    },
+    props: {
+        articulo: Object
+    },
     setup(){
         
         const store = useStore()
@@ -152,31 +158,10 @@ export default {
             return store.getters.getProveedores
         })
 
-        const cargarProveedores = () => {
-            store.dispatch('establecerProveedores')
-        }
-
-        const cargarCategorias = () =>{
-            store.dispatch('establecerCategorias')
-        }
-
-
-        onMounted(async() => {
-            cargarProveedores()
-            cargarCategorias()
-        })
-
-
         return {
             categorias, disableCatAct, disableBtnAdd, proveedores,
-            cargarCategorias, cargarProveedores
         }
     },
-    components: {
-        ModalCategorias
-    },
-    props: {
-        articulo: Object
-    },
+    
 }
 </script>
