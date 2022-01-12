@@ -4,7 +4,7 @@
         <button 
             type="submit" 
             class="btn btn-success btn-form"
-            :disabled='btnIsDisabled'
+            :disabled="btnIsDisabled"
         >
             Crear
         </button>
@@ -38,7 +38,8 @@ export default {
             const articuloActual = articulo.value
             if( articuloActual.nombre && 
                 Object.entries(articuloActual.categoria).length && 
-                articuloActual.descripcion && articuloActual.proveedor && 
+                Object.entries(articuloActual.proveedor).length &&
+                articuloActual.proveedor && 
                 articuloActual.precio && articuloActual.cantidad){
                 return false
             }
@@ -52,10 +53,6 @@ export default {
         // Hacemos un llamado a la acción para añadir un nuevo articulo.
         const nuevoArticulo = () => {
             store.dispatch('nuevoArticulo', articulo.value)
-            .then(() => {
-                router.push({name: 'InventarioArticulos'})
-                limpiarInputs()
-            })
         }
 
         return {

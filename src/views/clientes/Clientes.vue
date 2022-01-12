@@ -41,7 +41,13 @@
         >
             <tr>
                 <td class="table-wordbreak cuadro-tab-size"> {{cliente.nombre}} </td>
-                <td class="table-wordbreak cuadro-ta-tab-size"> {{cliente.descripcion}} </td>
+                <td 
+                    v-if="cliente.descripcion"
+                    class="table-wordbreak cuadro-ta-tab-size"
+                >
+                    {{cliente.descripcion}} 
+                </td>
+                <td v-else class="vacio"> Vacío </td>
                 <td class="cuadro-tab-size">
                     <a
                         class="nameArticuloDetail"
@@ -51,7 +57,10 @@
                         {{cliente.telefono}}
                     </a>
                 </td> 
-                <td v-if="cliente.correo" class="table-wordbreak cuadro-tab-size">
+                <td 
+                    v-if="cliente.correo"
+                    class="table-wordbreak cuadro-tab-size"
+                >
                     <a
                         class="nameArticuloDetail"
                         :href="`mailto:${cliente.correo}`"
@@ -60,7 +69,7 @@
                         {{cliente.correo}}
                     </a>
                 </td>
-                <td v-else class="table-wordbreak cuadro-tab-size vacio"> Vacío </td>
+                <td v-else class="vacio"> Vacío </td>
                 <td>
                     <a  
                         data-toggle="modal" 
@@ -96,7 +105,6 @@
 import ModalClientes from '../../components/clientes/ModalClientes.vue'
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
-import { onMounted } from '@vue/runtime-core'
 import swal from 'sweetalert'
 
 
@@ -120,10 +128,6 @@ export default {
             return store.getters.getClientesFiltrados
         })
 
-        const cargarClientes = () =>{
-            store.dispatch('establecerClientes')
-        }
-
         const establecerCliente = (cliente) => {
             const clienteActual = JSON.parse(JSON.stringify(cliente))
             store.dispatch('establecerClienteTemporal', clienteActual)
@@ -146,11 +150,6 @@ export default {
         const buscarCliente = (busqueda) =>{
             store.dispatch('busquedaCliente', busqueda)
         }
-
-        onMounted(() =>{
-            cargarClientes()
-            buscarCliente()
-        })
 
 
         return {

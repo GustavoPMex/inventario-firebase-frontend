@@ -38,7 +38,6 @@
 import InputsInventario from '../inventario/InputsInventario.vue'
 import {useStore} from 'vuex'
 import { computed } from '@vue/reactivity'
-import  {useRouter} from 'vue-router'
 
 export default {
     components: {
@@ -57,7 +56,7 @@ export default {
             const articuloValid = articulo.value
             if( articuloValid.nombre && 
                 Object.entries(articuloValid.categoria).length && 
-                articuloValid.descripcion && articuloValid.proveedor && 
+                Object.entries(articuloValid.proveedor).length && 
                 articuloValid.precio && articuloValid.cantidad){
                 return false
             }
@@ -73,7 +72,6 @@ export default {
         const editarArticulo = () => {
             store.dispatch('actualizarArticulo', articulo.value)
             .then(() => {
-                limpiarInputs()
                 $('#editarArticulo').modal('toggle')
             })
         }

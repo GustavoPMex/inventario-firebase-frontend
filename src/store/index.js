@@ -27,7 +27,6 @@ export default createStore({
     // El objeto articulo almacenará de manera temporal el objeto para
     // visualizarlo en el formulario
     articulo: {
-      id: 0,
       nombre: '',
       imagen: '',
       categoria: {},
@@ -71,7 +70,6 @@ export default createStore({
     clientes: [],
     clientesFiltrados: [],
     cliente: {
-      id: 0,
       nombre: '',
       descripcion: '',
       telefono: '',
@@ -261,10 +259,9 @@ export default createStore({
     },
     ELIMINAR_CLIENTE_TEMPORAL(state){
       state.cliente = {
-          id: 0,
           nombre: '',
           descripcion: '',
-          telefono: 0,
+          telefono: '',
           correo: ''
       }
     },
@@ -340,12 +337,36 @@ export default createStore({
     },
     // <<< ------------------------------ Articulos ------------------------------ >>>
     // Carga todos los articulos que tengamos almacenados actualmente
-    establecerArticulos({commit}){
-      if (sessionStorage.getItem('articulos')){
-        const articulos = JSON.parse(sessionStorage.getItem('articulos'))
-        commit('ESTABLECER_ARTICULOS', articulos)
+    async establecerArticulos({commit, state}){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const urlArticulos = `https://inventario-20aa4-default-rtdb.firebaseio.com/articulos/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
+        await axios.get(
+          urlArticulos
+        )
+        .then((response) => {
+          const datos = response.data
+          const listaArticulos = []
+          for (const articulo in datos){
+            const articuloAct = datos[articulo]
+            articuloAct.id = articulo
+            listaArticulos.push(articuloAct)
+          }
+          commit('ESTABLECER_ARTICULOS', listaArticulos)
+        })
+        .catch(() =>{
+          swal({
+            title: 'Ha ocurrido un error',
+            text: 'No se han podido obtener los articulos',
+            icon: 'warning'
+          })
+        })
       } else {
-        sessionStorage.setItem('articulos', JSON.stringify([]))
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
       }
     },
     // Configuramos el articulo para poder visualizarlo en el formulario
@@ -353,23 +374,100 @@ export default createStore({
       commit('ESTABLECER_ARTICULO_TEMPORAL', articulo)
     },
     // Añadimos un nuevo articulo
-    nuevoArticulo({commit, state}, articulo){
-      articulo.id = Math.floor((Math.random() * 1000) + 1)
-      commit('NUEVO_ARTICULO', articulo)
-      sessionStorage.setItem('articulos', JSON.stringify(state.articulos))
+    async nuevoArticulo({commit, state}, articulo){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const urlArticulos = `https://inventario-20aa4-default-rtdb.firebaseio.com/articulos/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
+        await axios.post(
+          urlArticulos,
+          articulo
+        )
+        .then((response) => {
+          const datosArticulo = response.data
+          articulo.id = datosArticulo.name
+          commit('NUEVO_ARTICULO', articulo)
+          router.push({name: 'InventarioArticulos'})
+          commit('ELIMINAR_ARTICULO_ALMACENADO')
+        })
+        .catch(() =>{
+          swal({
+            title: "Ha ocurrido un error",
+            text: "No se ha podido crear el articulo",
+            icon: "warning"
+          })
+        })
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
     },
     // Editamos un articulo
-    actualizarArticulo({commit, state}, articulo){
-      commit('ACTUALIZAR_ARTICULO', articulo)
-      sessionStorage.setItem('articulos', JSON.stringify(state.articulos))
+    async actualizarArticulo({commit, state}, articuloActualizado){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const urlArticulos =  `https://inventario-20aa4-default-rtdb.firebaseio.com/articulos/${state.sesionActual.id}/${articuloActualizado.id}.json?auth=${datosSesion.tokenSesion}`
+        axios.put(
+          urlArticulos,
+          {
+            nombre: articuloActualizado.nombre,
+            imagen: articuloActualizado.imagen,
+            categoria: articuloActualizado.categoria,
+            descripcion: articuloActualizado.descripcion,
+            proveedor: articuloActualizado.proveedor,
+            precio: articuloActualizado.precio,
+            cantidad: articuloActualizado.cantidad
+          }
+        )
+        .then(() => {
+          commit('ACTUALIZAR_ARTICULO', articuloActualizado)
+        })
+        .catch(() =>{
+          swal({
+            title: "Ha ocurrido un error",
+            text: "No se ha podido actualizar el articulo",
+            icon: "warning"
+          })
+        })
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
+      
     },
     // Eliminamos lo que se encuentre en state.articulo
     eliminarArticuloAlmacenado({commit}){
       commit('ELIMINAR_ARTICULO_ALMACENADO')
     },
-    eliminarArticulo({commit, state}, id){
-      commit('ELIMINAR_ARTICULO', id)
-      sessionStorage.setItem('articulos', JSON.stringify(state.articulos))
+    async eliminarArticulo({commit, state}, idArticulo){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const urlArticulos = `https://inventario-20aa4-default-rtdb.firebaseio.com/articulos/${state.sesionActual.id}/${idArticulo}.json?auth=${datosSesion.tokenSesion}`
+        await axios.delete(
+          urlArticulos
+        )
+        .then(() => {
+          commit('ELIMINAR_ARTICULO', idArticulo)
+        })
+        .catch(() =>{
+          swal({
+            title: 'Ha ocurrido un error',
+            text: "No se ha podido eliminar el articulo",
+            icon: "warning"
+          })
+        })
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
     },
     establecerArticulosFiltrados({commit, state}, filtros){
       if (filtros.categorias.length | filtros.proveedores.length){
@@ -419,12 +517,9 @@ export default createStore({
           const datos  = response.data
           const listaCategorias = []
           for (const categoria in datos){
-            const idCat = categoria
-            const nombreCat = datos[categoria].nombre
-            listaCategorias.push({
-              id: idCat,
-              nombre: nombreCat
-            })
+            const categoriaAct = datos[categoria]
+            categoriaAct.id = categoria
+            listaCategorias.push(categoriaAct)
           }
           commit('ESTABLECER_CATEGORIAS', listaCategorias)
         })
@@ -751,12 +846,37 @@ export default createStore({
       }
     },
     // <<< ------------------------------ Clientes ------------------------------ >>>
-    establecerClientes({commit}){
-      if (sessionStorage.getItem('clientes')) {
-        const clientes = JSON.parse(sessionStorage.getItem('clientes'))
-        commit('ESTABLECER_CLIENTES', clientes)
+    async establecerClientes({commit, state}){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const urlClientes = `https://inventario-20aa4-default-rtdb.firebaseio.com/clientes/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
+        await axios.get(
+          urlClientes
+        )
+        .then((response) =>{
+          const datos = response.data
+          const listaClientes = []
+          for (const cliente in datos){
+            const clienteAct = datos[cliente]
+            clienteAct.id = cliente
+            listaClientes.push(clienteAct)
+          }
+          commit('ESTABLECER_CLIENTES', listaClientes)
+        })
+        .catch(() =>{
+          swal({
+            title: "Ha ocurrido un error",
+            text: "No se ha podido obtener los clientes",
+            icon: "warning"
+          })
+        })
+
       } else {
-        sessionStorage.setItem('clientes', JSON.stringify([]))
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
       }
     },
     busquedaCliente({commit, state}, busqueda){
@@ -773,22 +893,98 @@ export default createStore({
     establecerClienteTemporal({commit}, payload){
       commit('ESTABLECER_CLIENTE_TEMPORAL', payload)
     },
-    nuevoCliente({commit, state}){
-      state.cliente.id = Math.floor((Math.random() * 1000) + 1)
-      commit('NUEVO_CLIENTE', state.cliente)
-      sessionStorage.setItem('clientes', JSON.stringify(state.clientes))
+    async nuevoCliente({commit, state}){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const nuevoCliente = JSON.parse(JSON.stringify(state.cliente))
+        const urlClientes =  `https://inventario-20aa4-default-rtdb.firebaseio.com/clientes/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
+        await axios.post(
+          urlClientes,
+          nuevoCliente
+        )
+        .then((response) =>{
+          const datos = response.data
+          nuevoCliente.id = datos.name
+
+          commit('NUEVO_CLIENTE', nuevoCliente)
+          commit('ELIMINAR_CLIENTE_TEMPORAL')
+          router.push({name: 'ClientesList'})
+        })
+        .catch(() =>{
+          swal({
+            title: "Ha ocurrido un error",
+            text: "No se ha podido agregar al cliente",
+            icon: "warning"
+          })
+        })
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
     },
-    actualizarCliente({commit, state}){
-      const clienteActual = JSON.parse(JSON.stringify(state.cliente))
-      commit('ACTUALIZAR_CLIENTE', clienteActual)
-      sessionStorage.setItem('clientes', JSON.stringify(state.clientes))
+    async actualizarCliente({commit, state}){
+      
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const clienteActual = JSON.parse(JSON.stringify(state.cliente))
+        const urlClientes =  `https://inventario-20aa4-default-rtdb.firebaseio.com/clientes/${state.sesionActual.id}/${clienteActual.id}.json?auth=${datosSesion.tokenSesion}`
+        await axios.put(
+          urlClientes,
+          {
+            nombre: clienteActual.nombre,
+            descripcion: clienteActual.descripcion,
+            telefono: clienteActual.telefono,
+            correo: clienteActual.correo
+          }
+        )
+        .then(() =>{
+          commit('ACTUALIZAR_CLIENTE', clienteActual)
+        })
+        .catch(() =>{
+          swal({
+            title: "Ha ocurrido un error",
+            text: "No se ha podido actualizar el cliente",
+            icon: "warning"
+          })
+        })
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
     },
     eliminarClienteTemporal({commit}){
       commit('ELIMINAR_CLIENTE_TEMPORAL')
     },
-    eliminarCliente({commit, state}, id){
-      commit('ELIMINAR_CLIENTE', id)
-      sessionStorage.setItem('clientes', JSON.stringify(state.clientes))
+    async eliminarCliente({commit, state}, idCliente){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const urlClientes =  `https://inventario-20aa4-default-rtdb.firebaseio.com/clientes/${state.sesionActual.id}/${idCliente}.json?auth=${datosSesion.tokenSesion}`
+        await axios.delete(
+          urlClientes
+        )
+        .then(() =>{
+          commit('ELIMINAR_CLIENTE', idCliente)
+        })
+        .catch(() =>{
+          swal({
+            title: "Ha ocurrido un error",
+            text: "No se ha podido eliminar el cliente",
+            icon: "warning"
+          })
+        })
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
     },
     // <<< ------------------------------ Personal ------------------------------ >>>
     async establecerPersonal({commit, state}){

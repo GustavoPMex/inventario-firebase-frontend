@@ -16,7 +16,6 @@
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
 import InputsClientes from '../../components/clientes/InputsClientes.vue'
-import { useRouter } from 'vue-router'
 
 export default {
     components: {
@@ -24,26 +23,20 @@ export default {
     },
     setup() {
         const store = useStore()
-        const router = useRouter()
 
         const cliente = computed(() =>{
             return store.getters.getCliente
         })
-        
-        const eliminarTemporal = () =>{
-            store.dispatch('eliminarClienteTemporal')
-        }
 
         const agregarCliente = () =>{
             store.dispatch('nuevoCliente')
-            eliminarTemporal()
-            router.push({name: 'ClientesList'})
         }
 
         const disabledBtn = computed(() =>{
             const nuevoCliente = cliente.value
-            if (nuevoCliente.nombre && nuevoCliente.descripcion &&
-                nuevoCliente.telefono.length > 9) {
+            if (nuevoCliente.nombre && nuevoCliente.telefono.length > 6 &&
+                nuevoCliente.correo.length === 0 ||
+                nuevoCliente.correo.includes('@') && nuevoCliente.correo.includes('.com')) {
                 return false
             } else {
                 return true

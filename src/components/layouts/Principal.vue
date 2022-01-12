@@ -22,7 +22,12 @@ export default {
             await store.dispatch('establecerProveedores')
             await store.dispatch('busquedaProveedor')
             // Inventario
+            await store.dispatch('establecerArticulos')
+            await store.dispatch('establecerArticulosFiltrados', {categorias: [], proveedores: []})
             await store.dispatch('establecerCategorias')
+            // Clientes
+            await store.dispatch('establecerClientes')
+            await store.dispatch('busquedaCliente')
             // Personal
             await store.dispatch('establecerPersonal')
             await store.dispatch('busquedaPersonal')

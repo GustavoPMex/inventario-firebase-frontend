@@ -201,16 +201,6 @@ export default {
             });
         }
 
-        const cargarInventario = () =>{
-            store.dispatch('establecerArticulos')
-        }
-
-        // Cargamos el inventario que tenemos almacenado
-        onMounted(() => {
-            cargarInventario()
-            configurarArticulos({categorias: [], proveedores: []})
-        })
-
         return {
             filtroCategoria, filtroProveedor, filtros, articulos, categorias,
             articulosAlmacenados, proveedores,

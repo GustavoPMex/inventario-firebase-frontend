@@ -12,6 +12,7 @@
                     <button 
                         type="submit" 
                         class="btn btn-success btn-form"
+                        :disabled="disabledBtn"
                     >
                         Actualizar
                     </button>
@@ -49,6 +50,16 @@ export default {
             return store.getters.getCliente
         })
 
+        const disabledBtn = computed(() =>{
+            const nuevoCliente = cliente.value
+            if (nuevoCliente.nombre && nuevoCliente.telefono.length > 6 &&
+                nuevoCliente.correo.length === 0 ||
+                nuevoCliente.correo.includes('@') && nuevoCliente.correo.includes('.com')) {
+                return false
+            } else {
+                return true
+            }
+        })
         const limpiarInputs = () =>{
             store.dispatch('eliminarClienteTemporal')
         }
@@ -62,7 +73,7 @@ export default {
         }
 
         return {
-            cliente,
+            cliente, disabledBtn,
             limpiarInputs, actualizar
         }
     },

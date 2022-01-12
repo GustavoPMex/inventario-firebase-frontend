@@ -30,7 +30,10 @@
                     <p class="detailArticulo">{{articulo.categoria.nombre}}</p>
                 </div>
                 
-                <div class="mb-4">
+                <div 
+                    class="mb-4"
+                    v-if="articulo.descripcion"
+                >
                     <p class="detailArticuloTitle"><strong>Descripcion</strong></p>
                     <p class="detailArticulo">{{articulo.descripcion}}</p>
                 </div>
