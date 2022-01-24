@@ -34,7 +34,7 @@ export default {
 
         const disabledBtn = computed(() =>{
             const nuevoCliente = cliente.value
-            if (nuevoCliente.nombre && nuevoCliente.telefono.length > 6 &&
+            if (nuevoCliente.nombre && nuevoCliente.telefono.toString().length > 6 &&
                 nuevoCliente.correo.length === 0 ||
                 nuevoCliente.correo.includes('@') && nuevoCliente.correo.includes('.com')) {
                 return false

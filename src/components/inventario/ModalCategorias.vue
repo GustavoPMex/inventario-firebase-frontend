@@ -14,7 +14,7 @@
                         type="text"
                         class="form-control"
                         placeholder="Añadir categoria"
-                        v-model="categoria.nombre"
+                        v-model.trim="categoria.nombre"
                     >
                     <button 
                         class="btn btn-success btn-form" type="submit"

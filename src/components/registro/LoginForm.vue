@@ -8,7 +8,7 @@
                     class="form-control" 
                     type="email"
                     placeholder="Ingrese correo"
-                    v-model="email"
+                    v-model.trim="email"
                 >
             </div>            
 
@@ -18,7 +18,7 @@
                     class="form-control"
                     type="password"
                     placeholder="Ingrese contraseña"
-                    v-model="password"
+                    v-model.trim="password"
                 >
             </div>
 

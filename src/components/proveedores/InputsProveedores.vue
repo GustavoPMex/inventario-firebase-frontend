@@ -5,7 +5,7 @@
     <input 
         class='form-control' 
         placeholder = 'Ingresa nombre' 
-        v-model="proveedor.nombre"
+        v-model.trim="proveedor.nombre"
     >
 </div>
 
@@ -15,7 +15,7 @@
         class='form-control' 
         rows="3"
         placeholder = 'Ingresa Dirección' 
-        v-model="proveedor.direccion"
+        v-model.trim="proveedor.direccion"
     ></textarea>
 </div>
 
@@ -23,7 +23,7 @@
 <div class="form-group">
     <label class="label-form">Teléfono</label>
     <input 
-        type="tel" 
+        type="number" 
         class="form-control" 
         placeholder="Ingresa teléfono"
         v-model="proveedor.telefono"
@@ -36,7 +36,7 @@
         class='form-control' 
         type="email"
         placeholder = 'Ingresa correo electrónico' 
-        v-model="proveedor.correo"
+        v-model.trim="proveedor.correo"
     >
 </div>
 
@@ -46,7 +46,7 @@
         class='form-control' 
         rows="5"
         placeholder = 'Ingresa nota adicional' 
-        v-model="proveedor.notaAdicional"
+        v-model.trim="proveedor.notaAdicional"
     ></textarea>
 </div>
 </template>

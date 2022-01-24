@@ -897,6 +897,8 @@ export default createStore({
       const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
       if (datosSesion){
         const nuevoCliente = JSON.parse(JSON.stringify(state.cliente))
+        // Convertimos el telefono a str para poder validarlo en firebase
+        nuevoCliente.telefono = nuevoCliente.telefono.toString()
         const urlClientes =  `https://inventario-20aa4-default-rtdb.firebaseio.com/clientes/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
         await axios.post(
           urlClientes,
@@ -936,7 +938,8 @@ export default createStore({
           {
             nombre: clienteActual.nombre,
             descripcion: clienteActual.descripcion,
-            telefono: clienteActual.telefono,
+            // Convertimos el telefono a str para poder validarlo en firebase
+            telefono: clienteActual.telefono.toString(),
             correo: clienteActual.correo
           }
         )

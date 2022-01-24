@@ -5,7 +5,7 @@
     <input 
         class='form-control' 
         placeholder = 'Ingresa nombre' 
-        v-model="cliente.nombre"
+        v-model.trim="cliente.nombre"
     >
 </div>
 
@@ -15,14 +15,14 @@
         class='form-control' 
         rows="3"
         placeholder = 'Ingresa Descripción' 
-        v-model="cliente.descripcion"
+        v-model.trim="cliente.descripcion"
     ></textarea>
 </div>
 
 <div class="form-group">
     <label class="label-form">Teléfono</label>
     <input 
-        type="tel" 
+        type="number" 
         class="form-control" 
         placeholder="Ingresa teléfono"
         v-model="cliente.telefono"
@@ -35,7 +35,7 @@
         class='form-control' 
         type="email"
         placeholder = 'Ingresa correo ' 
-        v-model="cliente.correo"
+        v-model.trim="cliente.correo"
     >
 </div>
 

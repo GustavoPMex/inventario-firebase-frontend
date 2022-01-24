@@ -91,7 +91,7 @@
         class='form-control' 
         rows="5"
         placeholder = 'Ingresa Descripcion' 
-        v-model="articulo.descripcion"
+        v-model.trim="articulo.descripcion"
     >
     </textarea>
 </div>

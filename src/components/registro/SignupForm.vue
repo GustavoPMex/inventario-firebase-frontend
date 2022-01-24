@@ -9,7 +9,7 @@
                     class="form-control" 
                     type="text"
                     placeholder="Ingrese Nombre"
-                    v-model="camposUsuario.nombre"
+                    v-model.trim="camposUsuario.nombre"
                 >
             </div>            
             
@@ -19,7 +19,7 @@
                     class="form-control"
                     type="email"
                     placeholder="Ingrese correo"
-                    v-model="camposUsuario.email"
+                    v-model.trim="camposUsuario.email"
                 >
             </div>
 
@@ -29,7 +29,7 @@
                     class='form-control' 
                     rows="5"
                     placeholder = 'Ingrese dirección' 
-                    v-model="camposUsuario.direccion"
+                    v-model.trim="camposUsuario.direccion"
                 >
                 </textarea>
             </div>
@@ -38,7 +38,7 @@
                 <label class="label-registration" for="">Teléfono</label>
                 <input 
                     class="form-control"
-                    type="tel"
+                    type="number"
                     placeholder="Ingrese teléfono"
                     v-model="camposUsuario.telefono"
                 >
@@ -50,7 +50,7 @@
                     class="form-control"
                     type="password"
                     placeholder="Ingrese contraseña"
-                    v-model="camposUsuario.passwordUno"
+                    v-model.trim="camposUsuario.passwordUno"
                 >
             </div>
             
@@ -61,7 +61,7 @@
                     class="form-control"
                     type="password"
                     placeholder="Ingrese contraseña nuevamente"
-                    v-model="camposUsuario.passwordDos"
+                    v-model.trim="camposUsuario.passwordDos"
                 >
             </div>
             
@@ -103,7 +103,7 @@ export default {
         const btnDisabled = computed(() =>{
             const usuario = camposUsuario.value
             if (usuario.nombre && usuario.email.includes('@') &&
-                usuario.direccion && usuario.telefono.length > 6 &&
+                usuario.direccion && usuario.telefono.toString().length > 6 &&
                 usuario.passwordUno > 5 &&
                 usuario.passwordDos === usuario.passwordUno) {
                 return false
