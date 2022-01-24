@@ -8,7 +8,7 @@
                     class="form-control" 
                     placeholder="Ingresa proveedor" 
                     name="search"
-                    v-model.trim="busqueda"
+                    v-model="busqueda"
                     
                 >
                 <div class="input-group-append">
@@ -24,7 +24,6 @@
         </div>
     </div>
 </div>
-
 <div v-if="proveedores.length" class="row w-100 mb-5 mx-auto table-responsive table-overflow">
     <table class="table table-striped table-dark ">
         <thead>
@@ -104,6 +103,7 @@
 import modalProveedor from '../../components/proveedores/ModalProveedor.vue'
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
+import { watch } from '@vue/runtime-core'
 
 export default {
     data() {
@@ -158,7 +158,7 @@ export default {
             if (this.busqueda === ''){
                 this.buscarProveedor()
             }
-        }
+        },
     },
 }
 </script>

@@ -386,6 +386,9 @@ export default createStore({
           const datosArticulo = response.data
           articulo.id = datosArticulo.name
           commit('NUEVO_ARTICULO', articulo)
+          // Se realiza el filtro al instante, para que asi se detecten los cambio al agregar un nuevo elemento
+          // ya que nuestra lista principal es el filtro
+          commit('ESTABLECER_ARTICULOS_FILTRADOS', state.articulos) 
           router.push({name: 'InventarioArticulos'})
           commit('ELIMINAR_ARTICULO_ALMACENADO')
         })
@@ -681,12 +684,21 @@ export default createStore({
       if (datosSesion){
         const proveedoresUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/proveedores/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
         const nuevoProvee = JSON.parse(JSON.stringify(state.proveedor))
+        // Convertimos el telefono a string para validarlo
+        nuevoProvee.telefono = nuevoProvee.telefono.toString()
         await axios.post(
           proveedoresUrl,
           nuevoProvee
         )
-        .then(() => {
+        .then((response) => {
+          const datosRespuesta = response.data
+          // La razon de esto, es porqué el "name" es el correspondiente id o nombre
+          // que le asigna en firebase
+          nuevoProvee.id = datosRespuesta.name
           commit('NUEVO_PROVEEDOR', nuevoProvee)
+          // Se realiza el filtro al instante, para que asi se detecten los cambio al agregar un nuevo elemento
+          // ya que nuestra lista principal es el filtro
+          commit('BUSQUEDA_PROVEEDOR', state.proveedores)
           commit('ELIMINAR_PROVEEDOR_TEMPORAL')
           router.push({name: 'ProveedoresList'})
         })
@@ -719,7 +731,7 @@ export default createStore({
           {
             nombre: proveedorActualizado.nombre,
             direccion: proveedorActualizado.direccion,
-            telefono: proveedorActualizado.telefono,
+            telefono: proveedorActualizado.telefono.toString(),
             correo: proveedorActualizado.correo,
             notaAdicional: proveedorActualizado.notaAdicional
           }
@@ -907,8 +919,10 @@ export default createStore({
         .then((response) =>{
           const datos = response.data
           nuevoCliente.id = datos.name
-
           commit('NUEVO_CLIENTE', nuevoCliente)
+          // Se realiza el filtro al instante, para que asi se detecten los cambio al agregar un nuevo elemento
+          // ya que nuestra lista principal es el filtro
+          commit('BUSQUEDA_PERSONAL', state.personal)
           commit('ELIMINAR_CLIENTE_TEMPORAL')
           router.push({name: 'ClientesList'})
         })
@@ -1138,7 +1152,8 @@ export default createStore({
             nombre: nuevoRegistro.nombre,
             email: datosFirebase.email,
             direccion: nuevoRegistro.direccion,
-            telefono: nuevoRegistro.telefono,
+            // Se convierte a string para validarlo en firebase
+            telefono: nuevoRegistro.telefono.toString(),
           })
           .then(() => {
             commit('ELIMINAR_USUARIO_TEMPORAL') 
@@ -1149,7 +1164,6 @@ export default createStore({
             // Éste código es por qué necesitamos eliminar el usuario si ocurre un error al momento de realizar
             // este post para registrar los datos extras del usuario
             const userDatos = `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4`
-            console.log(datosFirebase.idToken)
             axios.post(
               userDatos, 
               {'idToken': datosFirebase.idToken}
