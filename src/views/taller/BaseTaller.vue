@@ -27,19 +27,10 @@ export default {
 
         const listaElementosMenu = computed(() =>{
             return [
-                {name: 'Pendientes', linkName: 'TallerPendientes'},
-                {name: 'Terminados', linkName: 'TallerTerminados'},
+                {name: 'Servicios', linkName: 'TallerList'},
                 {name: 'Agregar', linkName: 'TallerAgregar'}
 
             ]
-        })
-
-        const cargarPendientes = () => {
-            store.dispatch('establecerTallerServicios')
-        }
-
-        onBeforeMount(() =>{
-            cargarPendientes()
         })
 
         return {

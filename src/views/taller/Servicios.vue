@@ -25,7 +25,7 @@
                             <label
                                 class="form-check-label" 
                                 :for="`checkTecnico${tecnico.id}`">
-                                {{tecnico.usuario}}
+                                {{tecnico.nombre}}
                             </label>
                         </div>
                 </div>
@@ -85,6 +85,44 @@
                 </div>
             </div>
     </div>
+    <div class="col-12 col-lg-3  mt-4 mt-lg-2 text-center">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Estado
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <div class="form-check">
+                            <input 
+                                class="form-check-input"
+                                type="checkbox" 
+                                value="pendiente"
+                                id="pendiente"
+                                v-model="filtroEstado"
+                                @change="configurarFiltroServicios"
+                            >
+
+                            <label class="form-check-label" for="pendiente">
+                                Pendiente
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input 
+                                class="form-check-input"
+                                type="checkbox" 
+                                value="terminado"
+                                id="terminado"
+                                v-model="filtroEstado"
+                                @change="configurarFiltroServicios"
+                            >
+
+                            <label class="form-check-label" for="terminado">
+                                Terminado
+                            </label>
+                        </div>
+                </div>
+            </div>
+    </div>
 </div>
 
 
@@ -97,7 +135,7 @@
             <th scope="col">Técnico</th>
             <th scope="col">Servicio</th>
             <th scope="col">Tipo</th>
-            <th scope="col">Descripcion</th>
+            <th scope="col">Estado</th>
             <th scope="col">Accion</th>
             </tr>
         </thead>
@@ -108,10 +146,10 @@
                 :key="index"
             >
                 <td class="cuadro-tab-size"> {{servicio.cliente.nombre}} </td> 
-                <td class="cuadro-tab-size"> {{servicio.tecnico.usuario}} </td>
+                <td class="cuadro-tab-size"> {{servicio.tecnico.nombre}} </td>
                 <td class="cuadro-tab-size"> {{servicio.servicio}} </td>
                 <td class="cuadro-tab-size"> {{servicio.tipo}} </td>
-                <td class="table-wordbreak cuadro-ta-tab-size"> {{servicio.descripcion}} </td>
+                <td class="cuadro-tab-size"> {{servicio.estado}} </td>
                 <td>
                     <a  
                         data-toggle="modal" 
@@ -124,6 +162,11 @@
                         <i class="fas fa-pen-square icon-table-up"></i>
                     </a>
                     <ModalTaller />
+                    <a 
+                        role="button"
+                    >
+                        <i class="fas fa-trash-alt icon-table-del"></i>
+                    </a>
                 </td>
             </tr>
         </tbody>
@@ -157,11 +200,15 @@ export default {
         // Filtros tipos
         const filtroTipo = ref([])
 
+        // Filtros estado
+        const filtroEstado = ref([])
+
         // Filtros
         const filtros = computed(() =>{
             return {
                 'tecnicos': filtroTecnico.value,
-                'tipos': filtroTipo.value
+                'tipos': filtroTipo.value,
+                'estado': filtroEstado.value
             }
         })
 
@@ -185,7 +232,7 @@ export default {
             return store.getters.getPersonal
         })
 
-        const configurarFiltroServicios = () =>{
+        const configurarFiltroServicios = () =>{ 
             store.dispatch('busquedaServicioTaller', filtros.value)
         }
 
@@ -194,12 +241,8 @@ export default {
             store.dispatch('establecerServicioTemporal', servicioEstablecido)
         }
 
-        onMounted(() =>{
-            configurarFiltroServicios({'tecnicos': [], 'tipos': []})
-        })
-
         return {
-            filtroTecnico, filtroTipo,
+            filtroTecnico, filtroTipo, filtroEstado,
             serviciosFiltradosPendientes, serviciosFiltrados, tecnicos, pendientes,
             configurarServicio, configurarFiltroServicios
         }

@@ -27,7 +27,7 @@
                 <li class="nav-item">
                     <router-link 
                     class="nav-link js-scroll-trigger" 
-                        :to="{name: 'TallerPendientes'}">
+                        :to="{name: 'TallerList'}">
                         Taller
                     </router-link>
                 </li>

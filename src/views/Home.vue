@@ -153,7 +153,6 @@ export default {
     // Se cargan las redes sociales que tengamos almacenada
     // de manera inicial 
     onMounted(() => {
-      cargarPendientes()
       cargarRedes()
     })
 

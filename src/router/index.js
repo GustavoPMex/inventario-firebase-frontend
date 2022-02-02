@@ -66,13 +66,8 @@ const routes = [
     children: [
       {
         path: '',
-        name: 'TallerPendientes',
-        component: () => import('../views/taller/Pendientes.vue')
-      },
-      {
-        path: 'terminados',
-        name: 'TallerTerminados',
-        component: () => import('../views/taller/Terminados.vue')
+        name: 'TallerList',
+        component: () => import('../views/taller/Servicios.vue')
       },
       {
         path: 'agregar',

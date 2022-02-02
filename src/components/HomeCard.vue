@@ -2,7 +2,7 @@
     <!-- If card.count == 0, we use 'free-div' -->
     <router-link class="a-content-div mx-auto mb-3 col-12 col-md-3"
         :class="{'free-div': !card.count}"
-        :to="{name: 'TallerPendientes'}"
+        :to="{name: 'TallerList'}"
     >
         <div class="div-content-a">
             <i v-if="card.count" class="fas fa-exclamation-triangle  icon-content-a"></i>

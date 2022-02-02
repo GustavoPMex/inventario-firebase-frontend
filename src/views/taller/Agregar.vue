@@ -2,6 +2,7 @@
     <form @submit.prevent="nuevoServicio">
         <InputsInventario :servicio='servicio'/>
         <button 
+            :disabled="btnDisabled"
             type="submit" 
             class="btn btn-success btn-form"
         >
@@ -37,12 +38,24 @@ export default {
             
         }
 
+        const btnDisabled = computed(() =>{
+            const servicioActual = servicio.value
+            if (Object.entries(servicioActual.cliente).length &&
+                Object.entries(servicioActual.tecnico).length &&
+                servicioActual.servicio && servicioActual.tipo &&
+                servicioActual.descripcion && servicioActual.estado){
+                return false
+            } else {
+                return true
+            }
+        })
+
         const limpiarInputs = () =>{
             store.dispatch('eliminarServicioTemporal')
         }
 
         return {
-            servicio,
+            servicio, btnDisabled,
             nuevoServicio
         }
     }

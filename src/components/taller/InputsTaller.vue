@@ -36,7 +36,7 @@
                 v-for="(tecnico, index) in tecnicos"
                 :key="index"
                 :value="tecnico"
-            > {{tecnico.usuario}}
+            > {{tecnico.nombre}}
             </option>
         </select>
     </div>
@@ -84,12 +84,11 @@
 
             <option 
                 value="pendiente" selected
-                v-if="habilitarOpcion"
             > Pendiente
             </option>
 
             <option 
-                v-else
+                v-if="habilitarOpcion"
                 value="terminado" selected
             > Terminado
             </option>
@@ -120,16 +119,12 @@ export default {
             return store.getters.getPersonal
         })
 
-        const habilitarOpcion = computed(() =>{
-            return route.name === 'TallerAgregar'
+        const servicio = computed(() =>{
+            return store.getters.getServicio
         })
 
-        const cargarClientes = () =>{
-            store.dispatch('establecerClientes')
-        }
-
-        onMounted(async() =>{
-            cargarClientes()
+        const habilitarOpcion = computed(() =>{
+            return route.name != 'TallerAgregar'
         })
     
 

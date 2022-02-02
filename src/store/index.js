@@ -58,7 +58,6 @@ export default createStore({
     tallerServicios: [],
     tallerServiciosFiltrados: [],
     servicioTaller: {
-      id: '',
       cliente: {},
       tecnico: {},
       servicio: '',
@@ -378,6 +377,7 @@ export default createStore({
       const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
       if (datosSesion){
         const urlArticulos = `https://inventario-20aa4-default-rtdb.firebaseio.com/articulos/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
+        console.log(articulo)
         await axios.post(
           urlArticulos,
           articulo
@@ -780,12 +780,36 @@ export default createStore({
       }
     },
     // <<< ------------------------------ Taller ------------------------------ >>>
-    establecerTallerServicios({commit}){
-      if(sessionStorage.getItem('tallerServicios')){
-        const pendientes = JSON.parse(sessionStorage.getItem('tallerServicios'))
-        commit('ESTABLECER_TALLER_PENDIENTES', pendientes)
+    async establecerTallerServicios({commit, state}){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const serviciosUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/servicios-taller/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
+        await axios.get(
+          serviciosUrl
+        )
+        .then((response) =>{
+          const datos = response.data
+          const listaServicios = []
+          for (const servicio in datos){
+            const servicioAct = datos[servicio]
+            servicioAct.id = servicio
+            listaServicios.push(servicioAct)
+          }
+          commit('ESTABLECER_TALLER_PENDIENTES', listaServicios)
+        })
+        .catch(() =>{
+          swal({
+            title: 'ERROR',
+            text: 'No se han podido obtener los servicios',
+            icon: 'warning'
+          })
+        })
       } else {
-        sessionStorage.setItem('tallerServicios', JSON.stringify([]))
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
       }
     },
     establecerServicioTemporal({commit}, servicio){
@@ -796,7 +820,6 @@ export default createStore({
       if (datosSesion){
         const serviciosUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/servicios-taller/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
         const nuevoServicio = JSON.parse(JSON.stringify(state.servicioTaller))
-
         await axios.post(
           serviciosUrl,
           nuevoServicio
@@ -833,25 +856,40 @@ export default createStore({
       sessionStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
     },
     busquedaServicioTaller({commit, state}, filtros){
-      if (filtros.tecnicos.length | filtros.tipos.length){
-        const serviciosFiltrados = []
+      if (filtros.tecnicos.length | filtros.tipos.length | filtros.estado.length){
+        // const serviciosFiltrados = []
         const filtrosTecnicos = Object.values(filtros.tecnicos)
         const filtrosTipos = Object.values(filtros.tipos)
+        const filtrosEstado = Object.values(filtros.estado)
 
-        for (const servicio in state.tallerServicios){
-          const servicioTaller = state.tallerServicios[servicio]
-          const servicioTallerTecnico = servicioTaller.tecnico.id
-          const servicioTallerTipo = servicioTaller.tipo
 
-          if (filtrosTecnicos.includes(servicioTallerTecnico) &
-              filtrosTipos.includes(servicioTallerTipo)) {
-              serviciosFiltrados.push(servicioTaller)
-          } else if (filtrosTecnicos.includes(servicioTallerTecnico) & !filtrosTipos.length){
-            serviciosFiltrados.push(servicioTaller)
-          } else if (filtrosTipos.includes(servicioTallerTipo) & !filtrosTecnicos.length){
-            serviciosFiltrados.push(servicioTaller)
-          }
-        }
+        const serviciosFiltrados = state.tallerServicios.filter(
+          servicio =>
+          filtrosTecnicos.includes(servicio.tecnico.id) ||
+          filtrosEstado.includes(servicio.estado) ||
+          filtrosTipos.includes(servicio.tipo)
+        )
+        // for (const servicio in state.tallerServicios){
+        //   const servicioTaller = state.tallerServicios[servicio]
+        //   const servicioTallerTecnico = servicioTaller.tecnico.id
+        //   const servicioTallerTipo = servicioTaller.tipo
+        //   const servicioEstado = servicioTaller.estado
+
+        //   // state.articulosFiltrados.filter(item => item.id !== payload)
+
+        //   if (filtrosTecnicos.includes(servicioTallerTecnico) &&
+        //       filtrosTipos.includes(servicioTallerTipo) && 
+        //       filtrosEstado.includes(servicioEstado)){
+        //       serviciosFiltrados.push(servicioTaller)
+        //   } else if (filtrosTecnicos.includes(servicioTallerTecnico) && !filtrosTipos.length && !filtrosEstado.length){
+        //     serviciosFiltrados.push(servicioTaller)
+
+        //   } else if (filtrosTipos.includes(servicioTallerTipo) && !filtrosTecnicos.length && !filtrosEstado.length){
+        //     serviciosFiltrados.push(servicioTaller)
+        //   } else if (filtrosEstado.includes(servicioEstado) && !filtrosTecnicos.length && !filtrosTipos.length){
+        //     serviciosFiltrados.push(servicioTaller)
+        //   }
+        // }
         commit('BUSQUEDA_SERVICIO_TALLER', serviciosFiltrados)
       } else {
         commit('BUSQUEDA_SERVICIO_TALLER', state.tallerServicios)
@@ -922,7 +960,7 @@ export default createStore({
           commit('NUEVO_CLIENTE', nuevoCliente)
           // Se realiza el filtro al instante, para que asi se detecten los cambio al agregar un nuevo elemento
           // ya que nuestra lista principal es el filtro
-          commit('BUSQUEDA_PERSONAL', state.personal)
+          commit('BUSQUEDA_CLIENTE', state.clientes)
           commit('ELIMINAR_CLIENTE_TEMPORAL')
           router.push({name: 'ClientesList'})
         })

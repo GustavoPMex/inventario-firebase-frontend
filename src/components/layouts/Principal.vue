@@ -28,6 +28,9 @@ export default {
             // Clientes
             await store.dispatch('establecerClientes')
             await store.dispatch('busquedaCliente')
+            // Taller
+            await store.dispatch('establecerTallerServicios')
+            await store.dispatch('busquedaServicioTaller',{'tecnicos': [], 'tipos': [], 'estado': []})
             // Personal
             await store.dispatch('establecerPersonal')
             await store.dispatch('busquedaPersonal')
