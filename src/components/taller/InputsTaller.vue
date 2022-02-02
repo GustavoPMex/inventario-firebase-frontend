@@ -59,7 +59,7 @@
             <option :value="''" disabled selected>Seleccione un tipo</option>
             <option value="equipo"> Equipo </option>
             <option value="servicio"> Servicio </option>
-            <option value="garantias"> Garantias </option>
+            <option value="garantia"> Garantias </option>
         </select>
     </div>
 

@@ -33,7 +33,7 @@ export default {
             store.dispatch('nuevoServicioTaller')
             .then(() =>{
                 limpiarInputs()
-                router.push({name: 'TallerPendientes'})
+                router.push({name: 'TallerList'})
             })
             
         }

@@ -825,6 +825,7 @@ export default createStore({
           nuevoServicio
         )
         .then(() =>{
+          commit('BUSQUEDA_SERVICIO_TALLER', state.tallerServicios)
           commit('NUEVO_SERVICIO_TALLER', nuevoServicio)
         })
         .catch(() => {
@@ -862,34 +863,40 @@ export default createStore({
         const filtrosTipos = Object.values(filtros.tipos)
         const filtrosEstado = Object.values(filtros.estado)
 
-
         const serviciosFiltrados = state.tallerServicios.filter(
           servicio =>
-          filtrosTecnicos.includes(servicio.tecnico.id) ||
-          filtrosEstado.includes(servicio.estado) ||
-          filtrosTipos.includes(servicio.tipo)
+          filtrosTecnicos.includes(servicio.tecnico.id) &
+          filtrosTipos.includes(servicio.tipo) &
+          filtrosEstado.includes(servicio.estado) |
+
+          // Tecnicos
+          filtrosTecnicos.includes(servicio.tecnico.id) &
+          filtrosTipos.includes(servicio.tipo) &
+          !filtrosEstado.length |
+
+          filtrosTecnicos.includes(servicio.tecnico.id) &
+          !filtrosTipos.length &
+          filtrosEstado.includes(servicio.estado) |
+
+          filtrosTecnicos.includes(servicio.tecnico.id) &
+          !filtrosTipos.length &
+          !filtrosEstado.length |
+          
+          // Tipo
+          !filtrosTecnicos.length &
+          filtrosTipos.includes(servicio.tipo) &
+          filtrosEstado.includes(servicio.estado) |
+
+          !filtrosTecnicos.length  &
+          filtrosTipos.includes(servicio.tipo) &
+          !filtrosEstado.length ||
+
+          // Estado
+          !filtrosTecnicos.length  &
+          !filtrosTipos.length &
+          filtrosEstado.includes(servicio.estado)
+
         )
-        // for (const servicio in state.tallerServicios){
-        //   const servicioTaller = state.tallerServicios[servicio]
-        //   const servicioTallerTecnico = servicioTaller.tecnico.id
-        //   const servicioTallerTipo = servicioTaller.tipo
-        //   const servicioEstado = servicioTaller.estado
-
-        //   // state.articulosFiltrados.filter(item => item.id !== payload)
-
-        //   if (filtrosTecnicos.includes(servicioTallerTecnico) &&
-        //       filtrosTipos.includes(servicioTallerTipo) && 
-        //       filtrosEstado.includes(servicioEstado)){
-        //       serviciosFiltrados.push(servicioTaller)
-        //   } else if (filtrosTecnicos.includes(servicioTallerTecnico) && !filtrosTipos.length && !filtrosEstado.length){
-        //     serviciosFiltrados.push(servicioTaller)
-
-        //   } else if (filtrosTipos.includes(servicioTallerTipo) && !filtrosTecnicos.length && !filtrosEstado.length){
-        //     serviciosFiltrados.push(servicioTaller)
-        //   } else if (filtrosEstado.includes(servicioEstado) && !filtrosTecnicos.length && !filtrosTipos.length){
-        //     serviciosFiltrados.push(servicioTaller)
-        //   }
-        // }
         commit('BUSQUEDA_SERVICIO_TALLER', serviciosFiltrados)
       } else {
         commit('BUSQUEDA_SERVICIO_TALLER', state.tallerServicios)
