@@ -1,6 +1,6 @@
 <template>
 <div
-    v-if="serviciosFiltradosPendientes.length"
+    v-if="serviciosAlmacenados.length"
     class="row w-100 mx-auto mb-5 justify-content-center">
     <div class="col-12 col-lg-3  mt-4 mt-lg-2 text-center">
             <div class="dropdown">
@@ -127,7 +127,7 @@
 
 
 
-<div v-if="pendientes.length" class="row w-100 mb-5 mx-auto table-responsive table-overflow">
+<div v-if="serviciosFiltrados.length" class="row w-100 mb-5 mx-auto table-responsive table-overflow">
     <table class="table table-striped table-dark ">
         <thead>
             <tr>
@@ -142,7 +142,7 @@
         <tbody 
         >
             <tr
-                v-for="(servicio, index) in pendientes"
+                v-for="(servicio, index) in serviciosFiltrados"
                 :key="index"
             >
                 <td class="cuadro-tab-size"> {{servicio.cliente.nombre}} </td> 
@@ -164,6 +164,7 @@
                     <ModalTaller />
                     <a 
                         role="button"
+                        @click="eliminar(servicio)"
                     >
                         <i class="fas fa-trash-alt icon-table-del"></i>
                     </a>
@@ -184,7 +185,6 @@
 import { computed, ref } from '@vue/reactivity'
 import { useStore } from 'vuex'
 import ModalTaller from '../../components/taller/ModalTaller.vue'
-import { onMounted } from '@vue/runtime-core'
 
 export default {
     components: {
@@ -212,20 +212,12 @@ export default {
             }
         })
 
-        const serviciosFiltradosPendientes = computed(() =>{
-            const pendientes = store.getters.getTallerServicios.filter(item => 
-                item.estado === 'pendiente'
-            )
-            return pendientes
+        const serviciosAlmacenados = computed(() =>{
+            return store.getters.getTallerServicios
         })
 
         const serviciosFiltrados = computed(() =>{
             return store.getters.getTallerServiciosFiltrados
-        })
-
-        const pendientes = computed(() =>{
-            const listaPendientes = serviciosFiltrados.value.filter(item => item.estado === 'pendiente')
-            return listaPendientes
         })
 
         const tecnicos = computed(() =>{
@@ -241,10 +233,24 @@ export default {
             store.dispatch('establecerServicioTemporal', servicioEstablecido)
         }
 
+        const eliminar = (servicio) =>{
+            swal({
+                title: `¿Eliminar ${servicio.servicio}?`,
+                icon: 'warning',
+                buttons: true,
+                dangerMode: true
+            })
+            .then((willDelete) =>{
+                if(willDelete){
+                    store.dispatch('eliminarServicio', servicio.id)
+                }
+            })
+        }
+
         return {
             filtroTecnico, filtroTipo, filtroEstado,
-            serviciosFiltradosPendientes, serviciosFiltrados, tecnicos, pendientes,
-            configurarServicio, configurarFiltroServicios
+            serviciosAlmacenados, serviciosFiltrados, tecnicos,
+            configurarServicio, configurarFiltroServicios, eliminar
         }
     }
 

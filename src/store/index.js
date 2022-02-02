@@ -844,17 +844,69 @@ export default createStore({
         router.push('/registro')
       }
     },
-    actualizarServicioTaller({commit, state}){
-      const servicioActual = JSON.parse(JSON.stringify(state.servicioTaller))
-      commit('ACTUALIZAR_SERVICIO_TALLER', servicioActual)
-      sessionStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
+    async actualizarServicioTaller({commit, state}){
+      
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+          const servicioActual = JSON.parse(JSON.stringify(state.servicioTaller))
+          const serviciosUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/servicios-taller/${state.sesionActual.id}/${servicioActual.id}.json?auth=${datosSesion.tokenSesion}`
+          await axios.put(
+            serviciosUrl,
+            {
+              cliente: servicioActual.cliente,
+              tecnico: servicioActual.tecnico,
+              servicio: servicioActual.servicio,
+              tipo: servicioActual.tipo,
+              descripcion: servicioActual.descripcion,
+              estado: servicioActual.estado
+            }
+          )
+          .then(() =>{
+            commit('ACTUALIZAR_SERVICIO_TALLER', servicioActual)
+          })
+          .catch(() =>{
+            swal({
+              title: 'ERROR',
+              text: 'No se ha podido actualizar el servicio'
+            })
+          })
+
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
     },
     eliminarServicioTemporal({commit}){
       commit('ELIMINAR_SERVICIO_TEMPORAL')
     },
-    eliminarServicio({commit, state}, id){
-      commit('ELIMINAR_SERVICIO_TALLER', id)
-      sessionStorage.setItem('tallerServicios', JSON.stringify(state.tallerServicios))
+    async eliminarServicio({commit, state}, id){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+          const serviciosUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/servicios-taller/${state.sesionActual.id}/${id}.json?auth=${datosSesion.tokenSesion}`
+          await axios.delete(
+            serviciosUrl
+          )
+          .then(() =>{
+            commit('ELIMINAR_SERVICIO_TALLER', id)
+          })
+          .catch(() =>{
+            swal({
+              title: 'ERROR',
+              text: 'No se ha podido eliminar el servicio',
+              icon: 'warning'
+            })
+          })
+
+      } else {
+          // Anulamos toda autorización
+          commit('ESTABLECER_USER_AUTH', false)
+          commit('ESTABLECER_SESION_ACTUAL', {})
+          sessionStorage.removeItem('sesionUsuario')
+          router.push('/registro')
+      }
     },
     busquedaServicioTaller({commit, state}, filtros){
       if (filtros.tecnicos.length | filtros.tipos.length | filtros.estado.length){
