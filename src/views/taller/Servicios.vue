@@ -79,7 +79,7 @@
                             >
 
                             <label class="form-check-label" for="garantia">
-                                Garantias
+                                Garantia
                             </label>
                         </div>
                 </div>

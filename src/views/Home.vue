@@ -80,7 +80,6 @@ import HomeCard from '../components/HomeCard.vue'
 import ModalRedesSociales from '../components/ModalRedesSociales.vue'
 import { computed } from '@vue/reactivity'
 import { useStore } from 'vuex'
-import { onMounted } from '@vue/runtime-core'
 
 export default {
   name: 'Home',
@@ -110,6 +109,7 @@ export default {
     const servicios = computed(() =>{
       return store.getters.getTallerServicios
     })
+
     // Total equipos
     const totalEquipos = computed(() => {
       const serviciosPendientes = servicios.value.filter(item => 
@@ -117,6 +117,7 @@ export default {
       )
       return serviciosPendientes.length
     })
+
     // Total servicios
     const totalServicios = computed(() => {
       const serviciosPendientes = servicios.value.filter(item => 
@@ -124,10 +125,11 @@ export default {
       )
       return serviciosPendientes.length
     })
+    
     // Total garantias
     const totalGarantias = computed(() => {
       const serviciosPendientes = servicios.value.filter(
-          item => item.tipo === 'garantias' && item.estado === 'pendiente'
+          item => item.tipo === 'garantia' && item.estado === 'pendiente'
       )
       return serviciosPendientes.length
     })
@@ -139,11 +141,7 @@ export default {
     }
 
     const establecerLayout = () => {
-          store.dispatch('setLayout', 'principal-layout')
-      }
-
-    const cargarPendientes = () => {
-      store.dispatch('establecerTallerServicios')
+      store.dispatch('setLayout', 'principal-layout')
     }
 
     return {

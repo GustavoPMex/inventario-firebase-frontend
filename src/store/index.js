@@ -614,7 +614,11 @@ export default createStore({
           proveedoresUrl
         )
         .then((response) =>{
-          commit('ESTABLECER_REDES', response.data)
+          if (!response.data){
+            commit('ESTABLECER_REDES', state.redesSociales)
+          } else {
+            commit('ESTABLECER_REDES', response.data)
+          }
         })
         .catch(() =>{
           swal({
