@@ -16,7 +16,7 @@ export default {
         const store = useStore()
 
         onMounted(async() => {
-            await store.dispatch('setLayout', 'principal-layout')
+            // Establecemos el usuario de la sesion actual
             await store.dispatch('establecerInicio')
             // Redes sociales
             await store.dispatch('establecerRedes')
