@@ -377,7 +377,6 @@ export default createStore({
       const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
       if (datosSesion){
         const urlArticulos = `https://inventario-20aa4-default-rtdb.firebaseio.com/articulos/${state.sesionActual.id}.json?auth=${datosSesion.tokenSesion}`
-        console.log(articulo)
         await axios.post(
           urlArticulos,
           articulo
@@ -607,37 +606,73 @@ export default createStore({
     // <<< ------------------------------ Redes sociales ------------------------------ >>>
     // Carga las redes sociales que tenamos almacenadas actualmente
     // En caso de que no tengamos, se crea el objeto vacío
-    establecerRedes({commit}){
-      if(sessionStorage.getItem('redes')){
-        const redes = JSON.parse(sessionStorage.getItem('redes'))
-        commit('ESTABLECER_REDES', redes)
+    async establecerRedes({commit, state}){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const proveedoresUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/redes-sociales/${state.sesionActual.id}/redes.json?auth=${datosSesion.tokenSesion}`
+        await axios.get(
+          proveedoresUrl
+        )
+        .then((response) =>{
+          commit('ESTABLECER_REDES', response.data)
+        })
+        .catch(() =>{
+          swal({
+            title: 'Error',
+            text: "No se han podido obtener las redes sociales",
+            icon: 'warning'
+          })
+        })
       } else {
-        sessionStorage.setItem('redes', JSON.stringify({
-          facebook: '',
-          twitter: '', 
-          instagram: ''
-        }))
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
       }
+      
     },
     // Cuando se llama a ésta funcion, establecemos las redes sociales actuales.
     // Que son almacenadas temporalmente para que podamos utilizarlas 
     // en el formulario
-    establecerRedesTemporales({commit}){
-      const redes = JSON.parse(sessionStorage.getItem('redes'))
-      commit('ESTABLECER_REDES_TEMPORALES', redes)
+    establecerRedesTemporales({commit, state}){
+      const redesTemp = JSON.parse(JSON.stringify(state.redesSociales))
+      commit('ESTABLECER_REDES_TEMPORALES', redesTemp)
     },
     // Procesamos el formulario para establecer las nuevas redes sociales
     // y almacenarlas en el local storage
-    nuevasRedesSociales({commit, state}, redes){
-      commit('NUEVAS_REDES_SOCIALES', redes)
-      sessionStorage.setItem('redes', JSON.stringify(state.redesSociales))
-      // Limpiamos "las redes sociales actuales" que se usan para
-      // visualizarlas en el formulario
-      commit('ESTABLECER_REDES_TEMPORALES', {
-        facebook: '',
-        twitter: '', 
-        instagram: ''
-      })
+    async nuevasRedesSociales({commit, state}, redes){
+      const datosSesion = JSON.parse(sessionStorage.getItem('sesionUsuario'))
+      if (datosSesion){
+        const proveedoresUrl = `https://inventario-20aa4-default-rtdb.firebaseio.com/redes-sociales/${state.sesionActual.id}/redes.json?auth=${datosSesion.tokenSesion}`
+        await axios.put(
+          proveedoresUrl,
+          redes
+        )
+        .then((response) =>{
+          commit('NUEVAS_REDES_SOCIALES', redes)
+          // Limpiamos "las redes sociales actuales" que se usan para
+          // visualizarlas en el formulario
+          commit('ESTABLECER_REDES_TEMPORALES', {
+            facebook: '',
+            twitter: '', 
+            instagram: ''
+          })
+        })
+        .catch(() =>{
+          swal({
+            title: 'Error',
+            text: "No se han podido establecer las redes sociales",
+            icon: 'warning'
+          })
+        })
+      } else {
+        // Anulamos toda autorización
+        commit('ESTABLECER_USER_AUTH', false)
+        commit('ESTABLECER_SESION_ACTUAL', {})
+        sessionStorage.removeItem('sesionUsuario')
+        router.push('/registro')
+      }
     },
     // <<< ------------------------------ Proveedores ------------------------------ >>>
     async establecerProveedores({commit, state}){
@@ -1230,7 +1265,7 @@ export default createStore({
       sessionStorage.removeItem('sesionUsuario')
       router.push('/registro')
     },
-    // REGISTRO DE USUARIO
+    // <<< ------------------------------ Registro de usuario ------------------------------ >>>
     async nuevoUsuario({commit, state}){
         const firebaseUrl = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAoa2fvZeId2U77SJ4BZjaEW_GGDB6B-C4'
         const nuevoRegistro = JSON.parse(JSON.stringify(state.registroUsuario))
@@ -1305,7 +1340,7 @@ export default createStore({
         {'idToken': id}
       )
     },
-    // Editar perfil actual
+    // <<< ------------------------------ Editar perfil actual ------------------------------ >>>
     establecerPerfilActual({commit, state}){
       const perfilActual = JSON.parse(JSON.stringify(state.userAuth))
       commit('ESTABLECER_PERFIL_ACTUAL', {

@@ -18,6 +18,8 @@ export default {
         onMounted(async() => {
             await store.dispatch('setLayout', 'principal-layout')
             await store.dispatch('establecerInicio')
+            // Redes sociales
+            await store.dispatch('establecerRedes')
             // Proveedores
             await store.dispatch('establecerProveedores')
             await store.dispatch('busquedaProveedor')

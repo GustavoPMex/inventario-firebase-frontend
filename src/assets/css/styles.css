@@ -10668,6 +10668,7 @@ select option{
 
 .cuadro-tab-size{
   width: 7em !important;
+  text-transform: capitalize;
 }
 
 .cuadro-ta-tab-size{

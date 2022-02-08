@@ -146,16 +146,6 @@ export default {
       store.dispatch('establecerTallerServicios')
     }
 
-    const cargarRedes = () =>{
-      store.dispatch('establecerRedes')
-    }
-    
-    // Se cargan las redes sociales que tengamos almacenada
-    // de manera inicial 
-    onMounted(() => {
-      cargarRedes()
-    })
-
     return {
       authorization, usuarioActual, redes,
       totalEquipos, totalServicios, totalGarantias,
